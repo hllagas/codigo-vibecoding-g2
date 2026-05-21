@@ -1,0 +1,2 @@
+actualiza el archivo claude.md para tener como referencia a docs/database-schema.md, es importante que apartir de ahora cuando se 
+  trabaje en el proyecto se tenga siempre contexto del schema de la base de datos 

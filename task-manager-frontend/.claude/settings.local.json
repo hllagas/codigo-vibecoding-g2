@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm --version)",
+      "Bash(npm show *)",
+      "Read(//c/Users/Henry/dev/codigo-vibecoding-g2/**)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Henry\\\\dev\\\\codigo-vibecoding-g2\\\\task-manager-frontend\\\\src\\\\App.css\" -Force)"
+    ]
+  }
+}

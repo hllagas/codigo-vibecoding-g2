@@ -1,0 +1,1 @@
+ahora has referencia a este archivo en claude.md para usarlo antes de cualquier tarea de desarrollo

@@ -1,0 +1,2 @@
+plantea una arquitectura de desarrollo para este proyecto, teniendo en cuenta el schema de la base de datos y que esto será un MVP recuerda que siempre buscamos las mejores prácticas de desarrollo y         
+  arquitectura, documenta esto en un archivo md
