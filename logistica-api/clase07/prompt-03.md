@@ -1,0 +1,2 @@
+vamos a mejorar el agente validator, para que luego de que este valide y si la validacion es exitosa, nos de una guia de como probar
+  manualmente lo que se implemente, por ejemplo si agregan nuevos endpoint cual seria el flujo manual para probar estos endpoints

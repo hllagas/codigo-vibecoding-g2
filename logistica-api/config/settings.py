@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+import dj_database_url
+from decouple import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,11 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z2j#g=-oz+*@*ky^x@gu#ds527goraharr*q@4i4wmtuk8wb4y'
+# Clave secreta leída desde el entorno — nunca hardcodear en el código
+SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Modo debug leído desde el entorno — False por defecto para producción segura
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -37,6 +40,25 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Apps de terceros
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
+    'django_filters',
+    # Apps de dominio — Phase 2
+    'apps.suppliers',
+    'apps.warehouses',
+    'apps.customers',
+    # Apps de dominio — Phase 3
+    'apps.products',
+    # Apps de dominio — Phase 4
+    'apps.drivers',
+    # Apps de dominio — Phase 6
+    'apps.transports',
+    # Apps de dominio — Phase 7
+    'apps.routes',
+    # Apps de dominio — Phase 8
+    'apps.shipments',
 ]
 
 MIDDLEWARE = [
@@ -72,11 +94,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# Base de datos configurada desde DATABASE_URL en el entorno
+# Por defecto usa SQLite local para que el entorno de desarrollo funcione sin configuración extra
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default='sqlite:///./db.sqlite3')
+    )
 }
 
 
@@ -115,3 +138,49 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+# Configuración de drf-spectacular para la documentación OpenAPI
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Logística API',
+    'DESCRIPTION': (
+        'API REST para la gestión logística de envíos de productos tecnológicos. '
+        'Cubre el ciclo completo: proveedores, almacenes, productos, conductores, '
+        'transportes, rutas y envíos.\n\n'
+        '**Autenticación**: JWT Bearer token. '
+        'Obtener token en `POST /api/v1/auth/token/` y enviarlo como '
+        '`Authorization: Bearer <token>` en cada request.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'auth', 'description': 'Autenticación JWT'},
+        {'name': 'suppliers', 'description': 'Proveedores de productos'},
+        {'name': 'warehouses', 'description': 'Almacenes y stock'},
+        {'name': 'customers', 'description': 'Clientes'},
+        {'name': 'products', 'description': 'Productos tecnológicos'},
+        {'name': 'drivers', 'description': 'Conductores'},
+        {'name': 'transports', 'description': 'Vehículos de transporte'},
+        {'name': 'routes', 'description': 'Rutas y paradas'},
+        {'name': 'shipments', 'description': 'Envíos'},
+    ],
+}
+
+# Configuración global de Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}

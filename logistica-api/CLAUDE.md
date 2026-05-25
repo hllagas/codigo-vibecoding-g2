@@ -4,12 +4,12 @@ Este archivo provee orientación a Claude Code (claude.ai/code) para trabajar en
 
 ## Lectura obligatoria al iniciar cualquier tarea
 
-> **REGLA**: Leer los dos documentos siguientes **antes** de escribir cualquier línea de código, modelo, migración, serializer, vista o test. No asumir nada sin verificar en estos archivos primero.
+> **REGLA**: Leer los dos documentos siguientes **antes de cualquier tarea**, sin excepción. No importa si es un fix pequeño, un nuevo modelo o una nueva app — leer primero, implementar después. No asumir nada sin verificar en estos archivos primero.
 
 | Documento | Cuándo es crítico |
 |---|---|
 | **[`docs/database-schema.md`](docs/database-schema.md)** | Al crear modelos, migraciones, FKs, restricciones, campos |
-| **[`docs/architecture.md`](docs/architecture.md)** | Al crear apps, vistas, serializers, URLs, tests, permisos |
+| **[`docs/architecture.md`](docs/architecture.md)** | Antes de **cualquier** tarea de desarrollo — define stack, estructura de apps, patrones, orden de implementación, auth y testing |
 
 Toda decisión de implementación debe respetar lo definido en estos documentos. Si hay conflicto entre una instrucción del usuario y estos documentos, señalarlo antes de proceder.
 
@@ -40,6 +40,29 @@ Toda decisión de implementación debe respetar lo definido en estos documentos.
 - Un **envío** parte desde un **almacén** y es transportado por un **transporte**
 - Un **transporte** tiene un **conductor** asignado y sigue una **ruta**
 - Los **productos** en almacén provienen de **proveedores**
+
+---
+
+## Metodología de desarrollo: SDD
+
+> **REGLA**: Todo desarrollo de un módulo sigue el flujo **Spec → Implement → Validator**, coordinado por el agente Orchestrator. No se escribe código sin un spec aprobado primero.
+
+**Agente de entrada para cualquier tarea de desarrollo**: `.claude/agents/orchestrator.md`
+
+```
+Orchestrator → Spec (crea spec/<module>.md)
+             → Implement (escribe código)
+             → Validator (revisa, si hay errores vuelve a Implement)
+```
+
+| Agente | Archivo | Escribe código |
+|---|---|---|
+| Orchestrator | `.claude/agents/orchestrator.md` | No |
+| Spec | `.claude/agents/spec.md` | No (solo MD) |
+| Implement | `.claude/agents/implement.md` | Sí |
+| Validator | `.claude/agents/validator.md` | No |
+
+Alcance completo del MVP: [`docs/mvp-scope.md`](docs/mvp-scope.md)
 
 ---
 

@@ -1,0 +1,1 @@
+genera un html con el esquema de la base de datos @datanase

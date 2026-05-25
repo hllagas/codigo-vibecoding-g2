@@ -32,14 +32,16 @@ logistica-api/
 │   ├── wsgi.py
 │   └── asgi.py
 │
-├── customers/
-├── suppliers/
-├── warehouses/
-├── products/
-├── drivers/
-├── transports/
-├── routes/
-├── shipments/
+├── apps/                 # Todas las apps de dominio viven aquí
+│   ├── __init__.py
+│   ├── customers/
+│   ├── suppliers/
+│   ├── warehouses/
+│   ├── products/
+│   ├── drivers/
+│   ├── transports/
+│   ├── routes/
+│   └── shipments/
 │
 ├── docs/
 │   ├── database-schema.md
@@ -49,25 +51,54 @@ logistica-api/
 └── requirements.txt
 ```
 
+### Crear una nueva app
+
+```bash
+# Crear la app dentro de apps/
+python manage.py startapp <name> apps/<name>
+
+# Actualizar apps/<name>/apps.py — fijar name al path completo
+# name = 'apps.<name>'
+```
+
 ### Estructura interna de cada app
 
-Todas las apps siguen la misma convención:
-
 ```
-app_name/
-├── apps.py
+apps/app_name/
+├── apps.py          # name = 'apps.app_name'
 ├── models.py
 ├── serializers.py
 ├── views.py
 ├── urls.py
-├── filters.py        # FilterSet de django-filter
+├── filters.py       # solo si se necesita FilterSet personalizado
+├── migrations/
 └── tests/
     ├── __init__.py
     ├── test_models.py
     └── test_views.py
 ```
 
-> `filters.py` se crea solo si la app necesita filtrado personalizado. Para filtros simples alcanza con `filterset_fields` en el ViewSet.
+### Convenciones de registro y referencias entre apps
+
+```python
+# INSTALLED_APPS en config/settings.py
+'apps.suppliers',
+'apps.warehouses',
+'apps.customers',
+
+# URLs en config/urls.py
+path('', include('apps.suppliers.urls')),
+
+# Importar modelos de otra app
+from apps.suppliers.models import Supplier
+
+# FK con string — usar app_label (último segmento del name)
+supplier = models.ForeignKey('suppliers.Supplier', on_delete=models.PROTECT)
+
+# Migraciones y tests usan el app_label
+# python manage.py makemigrations suppliers
+# python manage.py test suppliers
+```
 
 ---
 
