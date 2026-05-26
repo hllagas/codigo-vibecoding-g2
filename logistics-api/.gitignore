@@ -1,0 +1,14 @@
+# Entorno virtual
+.venv/
+
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+*.log
+
+# Variables de entorno
+.env
+
+# Claude Code — configuración local (no compartir en equipo)
+.claude/settings.local.json

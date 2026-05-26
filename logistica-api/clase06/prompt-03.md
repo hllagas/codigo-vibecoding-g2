@@ -1,7 +1,7 @@
 ahora vamos a definir el contexto y el alcance del proyecto, esto debe estar en el claude.md
   
   Alcance: Crear un API Rest Full, usando django-rest-framework, siguiendo las buenas practicas de desarrollo, esta api tendra los 
-  siguientes modulos:
+  siguientes módulos:
   
   - cliente (customer) empresa o persona que genera envios
   - envio (sipment) unidad central de negocio, Esta compuesto por origen, destino, estado, fecha de entrega, etc, costo calculado
