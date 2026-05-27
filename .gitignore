@@ -1,0 +1,88 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.env/
+
+# Django / Flask / FastAPI
+*.sqlite3
+db.sqlite3
+*.sqlite
+media/
+staticfiles/
+collected_static/
+
+# Environment variables — keep .env.example
+.env
+.env.*
+!.env.example
+
+# Testing / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+sdist/
+wheels/
+pip-wheel-metadata/
+
+# mypy / pyright
+.mypy_cache/
+.pytype/
+.dmypy.json
+
+# ─── Node.js ──────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# Vite
+*.local
+
+# ─── IDEs & editors ───────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── OS ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Prisma ───────────────────────────────────────────────
+# Keep migrations but ignore generated client if committing it is not intended
+# prisma/generated/
+
+# ─── Claude Code ──────────────────────────────────────────
+# Allow .claude/ agent definitions but not local settings
+.claude/settings.local.json
