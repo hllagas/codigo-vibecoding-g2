@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esquema de Base de Datos — Logistics API</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --border:    #2a2d3e;
+      --accent:    #4f8ef7;
+      --accent2:   #7c5ce0;
+      --green:     #00c9a7;
+      --yellow:    #ffd166;
+      --red:       #ef476f;
+      --muted:     #6b7280;
+      --text:      #e2e8f0;
+      --text-dim:  #94a3b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: var(--text-dim);
+      margin-top: .4rem;
+      font-size: .95rem;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: .75rem;
+      margin: 3rem 0 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Grid layout ── */
+    .tables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* ── Table card ── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow .2s;
+    }
+    .table-card:hover {
+      box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(79,142,247,.1);
+    }
+
+    .table-card-header {
+      padding: .75rem 1rem;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .table-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+    .table-card-header h2 {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: .92rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .table-card-header span.desc {
+      font-size: .78rem;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    /* ── Columns table ── */
+    table.cols {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.cols thead th {
+      padding: .45rem .9rem;
+      text-align: left;
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    table.cols tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,.03);
+      transition: background .1s;
+    }
+    table.cols tbody tr:last-child { border-bottom: none; }
+    table.cols tbody tr:hover { background: rgba(255,255,255,.03); }
+    table.cols td {
+      padding: .4rem .9rem;
+      vertical-align: top;
+    }
+    .col-name {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: .82rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .col-type {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: .78rem;
+      color: var(--green);
+    }
+    .col-constraints {
+      font-size: .75rem;
+      color: var(--text-dim);
+    }
+    .col-desc {
+      font-size: .76rem;
+      color: var(--muted);
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: .1rem .4rem;
+      border-radius: 4px;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .3px;
+      margin-right: 2px;
+      white-space: nowrap;
+    }
+    .badge-pk  { background: rgba(255,209,102,.15); color: var(--yellow); border: 1px solid rgba(255,209,102,.3); }
+    .badge-fk  { background: rgba(79,142,247,.15);  color: var(--accent);  border: 1px solid rgba(79,142,247,.3); }
+    .badge-uq  { background: rgba(0,201,167,.15);   color: var(--green);   border: 1px solid rgba(0,201,167,.3); }
+    .badge-nn  { background: rgba(239,71,111,.15);  color: var(--red);     border: 1px solid rgba(239,71,111,.3); }
+    .badge-ch  { background: rgba(124,92,224,.15);  color: var(--accent2); border: 1px solid rgba(124,92,224,.3); }
+    .badge-au  { background: rgba(107,114,128,.15); color: var(--muted);   border: 1px solid rgba(107,114,128,.3); }
+    .badge-nl  { background: rgba(255,255,255,.06); color: var(--muted);   border: 1px solid rgba(255,255,255,.1); }
+    .badge-df  { background: rgba(0,201,167,.10);   color: var(--green);   border: 1px solid rgba(0,201,167,.2); }
+
+    /* ── Relationships section ── */
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .rel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .9rem 1rem;
+    }
+    .rel-card h3 {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: .82rem;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    .rel-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .25rem 0;
+      font-size: .78rem;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .rel-row:last-child { border-bottom: none; }
+    .rel-from {
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: var(--text);
+    }
+    .rel-arrow {
+      color: var(--muted);
+      font-size: .8rem;
+      flex-shrink: 0;
+    }
+    .rel-to {
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: var(--accent);
+    }
+    .rel-type {
+      margin-left: auto;
+      font-size: .67rem;
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      border-radius: 3px;
+      padding: .1rem .35rem;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem .9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .8rem 1rem;
+      margin-bottom: 2rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .75rem;
+      color: var(--text-dim);
+    }
+
+    /* ── Color coding per domain ── */
+    .icon-warehouse  { background: rgba(79,142,247,.2);  color: var(--accent); }
+    .icon-supplier   { background: rgba(0,201,167,.2);   color: var(--green); }
+    .icon-customer   { background: rgba(255,209,102,.2); color: var(--yellow); }
+    .icon-product    { background: rgba(124,92,224,.2);  color: var(--accent2); }
+    .icon-transport  { background: rgba(239,71,111,.2);  color: var(--red); }
+    .icon-driver     { background: rgba(255,209,102,.2); color: var(--yellow); }
+    .icon-route      { background: rgba(0,201,167,.2);   color: var(--green); }
+    .icon-shipment   { background: rgba(79,142,247,.2);  color: var(--accent); }
+    .icon-builtin    { background: rgba(107,114,128,.2); color: var(--muted); }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: var(--muted);
+      font-size: .75rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Esquema de Base de Datos</h1>
+  <p>Logistics API &nbsp;·&nbsp; Django 6 + PostgreSQL</p>
+</header>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><span class="badge badge-pk">PK</span> Primary Key</div>
+  <div class="legend-item"><span class="badge badge-fk">FK</span> Foreign Key</div>
+  <div class="legend-item"><span class="badge badge-uq">UQ</span> Unique</div>
+  <div class="legend-item"><span class="badge badge-ch">CH</span> Choices</div>
+  <div class="legend-item"><span class="badge badge-nl">NULL</span> Nullable</div>
+  <div class="legend-item"><span class="badge badge-df">DF</span> Default</div>
+  <div class="legend-item"><span class="badge badge-au">AUTO</span> Auto-generated</div>
+</div>
+
+<!-- ─── Built-in tables ─── -->
+<div class="section-title">Tablas de Django (built-in)</div>
+<div class="tables-grid">
+
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-builtin">🔐</div>
+      <h2>auth_user</h2>
+      <span class="desc">Credenciales de clientes y conductores</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">username</td><td class="col-type">varchar(150)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">email</td><td class="col-type">varchar(254)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">password</td><td class="col-type">varchar(128)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">first_name</td><td class="col-type">varchar(150)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">last_name</td><td class="col-type">varchar(150)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">is_active</td><td class="col-type">boolean</td><td class="col-constraints"><span class="badge badge-df">DF=True</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-builtin">👥</div>
+      <h2>auth_group</h2>
+      <span class="desc">Grupos de permisos</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td class="col-name">name</td><td class="col-type">varchar(150)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ─── Project tables ─── -->
+<div class="section-title">Tablas del proyecto</div>
+<div class="tables-grid">
+
+  <!-- warehouses_warehouse -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-warehouse">🏭</div>
+      <h2>warehouses_warehouse</h2>
+      <span class="desc">Almacén</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">name</td><td class="col-type">varchar(200)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">code</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">address</td><td class="col-type">text</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">city</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">state</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">country</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">latitude</td><td class="col-type">decimal(9,6)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">longitude</td><td class="col-type">decimal(9,6)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">capacity_m3</td><td class="col-type">decimal(10,2)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">is_active</td><td class="col-type">boolean</td><td class="col-constraints"><span class="badge badge-df">DF=True</span></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- suppliers_supplier -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-supplier">🏢</div>
+      <h2>suppliers_supplier</h2>
+      <span class="desc">Proveedor</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">name</td><td class="col-type">varchar(200)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">tax_id</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">contact_name</td><td class="col-type">varchar(200)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">email</td><td class="col-type">varchar(254)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">phone</td><td class="col-type">varchar(20)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">address</td><td class="col-type">text</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">city</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">country</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">is_active</td><td class="col-type">boolean</td><td class="col-constraints"><span class="badge badge-df">DF=True</span></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- customers_customer -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-customer">👤</div>
+      <h2>customers_customer</h2>
+      <span class="desc">Cliente</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">user_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→auth_user</span><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">company_name</td><td class="col-type">varchar(200)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">tax_id</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">phone</td><td class="col-type">varchar(20)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">address</td><td class="col-type">text</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">city</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">country</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- drivers_driver -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-driver">🚗</div>
+      <h2>drivers_driver</h2>
+      <span class="desc">Conductor</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">user_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→auth_user</span><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">license_number</td><td class="col-type">varchar(50)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">license_type</td><td class="col-type">varchar(10)</td><td class="col-constraints"><span class="badge badge-ch">A/B/C</span></td></tr>
+        <tr><td class="col-name">phone</td><td class="col-type">varchar(20)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-ch">AVAILABLE / ON_ROUTE / OFF_DUTY</span></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- transports_transport -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-transport">🚚</div>
+      <h2>transports_transport</h2>
+      <span class="desc">Vehículo de entrega</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">license_plate</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">type</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-ch">TRUCK/VAN/MOTORCYCLE/BIKE</span></td></tr>
+        <tr><td class="col-name">brand</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">model</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">year</td><td class="col-type">smallint</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">capacity_kg</td><td class="col-type">decimal(8,2)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">capacity_m3</td><td class="col-type">decimal(8,2)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-ch">AVAILABLE / IN_ROUTE / MAINTENANCE / INACTIVE</span></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- products_product -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-product">📦</div>
+      <h2>products_product</h2>
+      <span class="desc">Producto tecnológico</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">supplier_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→suppliers_supplier</span></td></tr>
+        <tr><td class="col-name">warehouse_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→warehouses_warehouse</span></td></tr>
+        <tr><td class="col-name">name</td><td class="col-type">varchar(200)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">sku</td><td class="col-type">varchar(50)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span></td></tr>
+        <tr><td class="col-name">description</td><td class="col-type">text</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">unit_price</td><td class="col-type">decimal(10,2)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">weight_kg</td><td class="col-type">decimal(8,3)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">length_cm</td><td class="col-type">decimal(8,2)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">width_cm</td><td class="col-type">decimal(8,2)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">height_cm</td><td class="col-type">decimal(8,2)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">stock</td><td class="col-type">integer</td><td class="col-constraints">≥ 0</td></tr>
+        <tr><td class="col-name">is_active</td><td class="col-type">boolean</td><td class="col-constraints"><span class="badge badge-df">DF=True</span></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- routes_route -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-route">🗺️</div>
+      <h2>routes_route</h2>
+      <span class="desc">Ruta</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">name</td><td class="col-type">varchar(200)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">origin_warehouse_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→warehouses_warehouse</span></td></tr>
+        <tr><td class="col-name">estimated_duration_hours</td><td class="col-type">decimal(5,2)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">is_active</td><td class="col-type">boolean</td><td class="col-constraints"><span class="badge badge-df">DF=True</span></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- routes_routestop -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-route">📍</div>
+      <h2>routes_routestop</h2>
+      <span class="desc">Parada dentro de una ruta</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">route_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→routes_route</span></td></tr>
+        <tr><td class="col-name">order</td><td class="col-type">smallint</td><td class="col-constraints"><span class="badge badge-uq">UQ(route,order)</span></td></tr>
+        <tr><td class="col-name">address</td><td class="col-type">text</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">city</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td></tr>
+        <tr><td class="col-name">latitude</td><td class="col-type">decimal(9,6)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+        <tr><td class="col-name">longitude</td><td class="col-type">decimal(9,6)</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- shipments_shipment (full width) -->
+  <div class="table-card" style="grid-column: 1 / -1;">
+    <div class="table-card-header">
+      <div class="table-icon icon-shipment">📬</div>
+      <h2>shipments_shipment</h2>
+      <span class="desc">Unidad central de negocio — envío completo</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td><td class="col-desc">—</td></tr>
+        <tr><td class="col-name">tracking_number</td><td class="col-type">varchar(50)</td><td class="col-constraints"><span class="badge badge-uq">UQ</span><span class="badge badge-au">AUTO</span></td><td class="col-desc">Código de seguimiento generado en save()</td></tr>
+        <tr><td class="col-name">customer_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→customers_customer</span></td><td class="col-desc">Cliente que genera el envío</td></tr>
+        <tr><td class="col-name">origin_warehouse_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→warehouses_warehouse</span></td><td class="col-desc">Almacén de despacho</td></tr>
+        <tr><td class="col-name">transport_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→transports_transport</span><span class="badge badge-nl">NULL</span></td><td class="col-desc">Vehículo asignado</td></tr>
+        <tr><td class="col-name">driver_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→drivers_driver</span><span class="badge badge-nl">NULL</span></td><td class="col-desc">Conductor asignado</td></tr>
+        <tr><td class="col-name">route_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→routes_route</span><span class="badge badge-nl">NULL</span></td><td class="col-desc">Ruta asignada</td></tr>
+        <tr><td class="col-name">destination_address</td><td class="col-type">text</td><td class="col-constraints"></td><td class="col-desc">Dirección de entrega</td></tr>
+        <tr><td class="col-name">destination_city</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td><td class="col-desc">—</td></tr>
+        <tr><td class="col-name">destination_country</td><td class="col-type">varchar(100)</td><td class="col-constraints"></td><td class="col-desc">—</td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">varchar(20)</td><td class="col-constraints"><span class="badge badge-ch">PENDING / PICKED_UP / IN_TRANSIT / DELIVERED / CANCELLED / RETURNED</span></td><td class="col-desc">Estado del envío</td></tr>
+        <tr><td class="col-name">estimated_delivery_date</td><td class="col-type">date</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td><td class="col-desc">Fecha estimada de entrega</td></tr>
+        <tr><td class="col-name">actual_delivery_date</td><td class="col-type">date</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td><td class="col-desc">Fecha real de entrega</td></tr>
+        <tr><td class="col-name">total_weight_kg</td><td class="col-type">decimal(8,3)</td><td class="col-constraints"><span class="badge badge-df">DF=0</span></td><td class="col-desc">Calculado al crear</td></tr>
+        <tr><td class="col-name">shipping_cost</td><td class="col-type">decimal(10,2)</td><td class="col-constraints"><span class="badge badge-df">DF=0</span></td><td class="col-desc">50 + peso×2.5 + items×5</td></tr>
+        <tr><td class="col-name">notes</td><td class="col-type">text</td><td class="col-constraints"><span class="badge badge-nl">NULL</span></td><td class="col-desc">—</td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td><td class="col-desc">—</td></tr>
+        <tr><td class="col-name">updated_at</td><td class="col-type">datetime</td><td class="col-constraints"><span class="badge badge-au">AUTO</span></td><td class="col-desc">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- shipments_shipmentproduct -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-icon icon-shipment">🔗</div>
+      <h2>shipments_shipmentproduct</h2>
+      <span class="desc">M2M — productos en un envío</span>
+    </div>
+    <table class="cols">
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-pk">PK</span><span class="badge badge-au">AUTO</span></td></tr>
+        <tr><td class="col-name">shipment_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→shipments_shipment</span><span class="badge badge-uq">UQ(shipment,product)</span></td></tr>
+        <tr><td class="col-name">product_id</td><td class="col-type">integer</td><td class="col-constraints"><span class="badge badge-fk">FK→products_product</span></td></tr>
+        <tr><td class="col-name">quantity</td><td class="col-type">integer</td><td class="col-constraints">≥ 1</td></tr>
+        <tr><td class="col-name">unit_price</td><td class="col-type">decimal(10,2)</td><td class="col-constraints"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ─── Relationships ─── -->
+<div class="section-title">Relaciones</div>
+<div class="rel-grid">
+
+  <div class="rel-card">
+    <h3>auth_user</h3>
+    <div class="rel-row">
+      <span class="rel-from">auth_user</span>
+      <span class="rel-arrow">──1:1──▶</span>
+      <span class="rel-to">customers_customer</span>
+      <span class="rel-type">OneToOne</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">auth_user</span>
+      <span class="rel-arrow">──1:1──▶</span>
+      <span class="rel-to">drivers_driver</span>
+      <span class="rel-type">OneToOne</span>
+    </div>
+  </div>
+
+  <div class="rel-card">
+    <h3>warehouses_warehouse</h3>
+    <div class="rel-row">
+      <span class="rel-from">warehouse</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">products_product</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">warehouse</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">routes_route</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">warehouse</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipments_shipment</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+  </div>
+
+  <div class="rel-card">
+    <h3>suppliers_supplier</h3>
+    <div class="rel-row">
+      <span class="rel-from">supplier</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">products_product</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+  </div>
+
+  <div class="rel-card">
+    <h3>routes_route</h3>
+    <div class="rel-row">
+      <span class="rel-from">route</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">routes_routestop</span>
+      <span class="rel-type">CASCADE</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">route</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipments_shipment</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+  </div>
+
+  <div class="rel-card">
+    <h3>shipments_shipment</h3>
+    <div class="rel-row">
+      <span class="rel-from">customer</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipment</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">transport</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipment</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">driver</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipment</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">shipment</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipmentproduct</span>
+      <span class="rel-type">CASCADE</span>
+    </div>
+    <div class="rel-row">
+      <span class="rel-from">product</span>
+      <span class="rel-arrow">──1:N──▶</span>
+      <span class="rel-to">shipmentproduct</span>
+      <span class="rel-type">PROTECT</span>
+    </div>
+  </div>
+
+  <div class="rel-card">
+    <h3>Estados: shipments_shipment.status</h3>
+    <div class="rel-row" style="flex-wrap:wrap; gap:.3rem; padding:.4rem 0;">
+      <span style="font-size:.72rem; color:var(--muted);">PENDING</span>
+      <span class="rel-arrow">→</span>
+      <span style="font-size:.72rem; color:var(--accent);">PICKED_UP</span>
+      <span class="rel-arrow">&nbsp;|&nbsp;</span>
+      <span style="font-size:.72rem; color:var(--muted);">PENDING</span>
+      <span class="rel-arrow">→</span>
+      <span style="font-size:.72rem; color:var(--red);">CANCELLED</span>
+    </div>
+    <div class="rel-row" style="flex-wrap:wrap; gap:.3rem; padding:.4rem 0;">
+      <span style="font-size:.72rem; color:var(--accent);">PICKED_UP</span>
+      <span class="rel-arrow">→</span>
+      <span style="font-size:.72rem; color:var(--accent2);">IN_TRANSIT</span>
+    </div>
+    <div class="rel-row" style="flex-wrap:wrap; gap:.3rem; padding:.4rem 0;">
+      <span style="font-size:.72rem; color:var(--accent2);">IN_TRANSIT</span>
+      <span class="rel-arrow">→</span>
+      <span style="font-size:.72rem; color:var(--green);">DELIVERED</span>
+      <span class="rel-arrow">&nbsp;|&nbsp;</span>
+      <span style="font-size:.72rem; color:var(--accent2);">IN_TRANSIT</span>
+      <span class="rel-arrow">→</span>
+      <span style="font-size:.72rem; color:var(--red);">RETURNED</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Logistics API &nbsp;·&nbsp; Generado desde <code>docs/database-schema.md</code>
+</footer>
+
+</body>
+</html>

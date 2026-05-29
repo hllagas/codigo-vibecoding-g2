@@ -1,0 +1,302 @@
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useCustomers } from '@/hooks/useCustomers';
+import { useWarehouses } from '@/hooks/useWarehouses';
+import { useRoutes } from '@/hooks/useRoutes';
+import type { Shipment, ShipmentStatus, ShipmentUpdate } from '@/types/shipment';
+
+const shipmentEditSchema = z.object({
+  tracking_number: z.string().min(1, 'El número de seguimiento es requerido'),
+  customer: z.string().min(1, 'El cliente es requerido'),
+  origin_warehouse: z.string().min(1, 'El almacén de origen es requerido'),
+  route: z.string(),
+  destination_address: z.string().min(1, 'La dirección es requerida'),
+  destination_city: z.string().min(1, 'La ciudad es requerida'),
+  destination_country: z.string().min(1, 'El país es requerido'),
+  status: z.enum(['pending', 'processing', 'in_transit', 'delivered', 'cancelled', 'returned']),
+  scheduled_delivery_date: z.string().min(1, 'La fecha es requerida'),
+  actual_delivery_date: z.string(),
+  total_weight_kg: z.string().min(1, 'El peso es requerido'),
+  notes: z.string(),
+});
+
+type ShipmentEditValues = z.infer<typeof shipmentEditSchema>;
+
+interface ShipmentEditFormProps {
+  defaultValues: Shipment;
+  onSubmit: (data: ShipmentUpdate) => Promise<void>;
+  isSubmitting?: boolean;
+}
+
+export function ShipmentEditForm({ defaultValues, onSubmit, isSubmitting }: ShipmentEditFormProps) {
+  const { data: customersData } = useCustomers({ page: 1 });
+  const { data: warehousesData } = useWarehouses({ is_active: true, page: 1 });
+  const { data: routesData } = useRoutes({ page: 1 });
+
+  const form = useForm<ShipmentEditValues>({
+    resolver: zodResolver(shipmentEditSchema),
+    defaultValues: {
+      tracking_number: defaultValues.tracking_number,
+      customer: String(defaultValues.customer),
+      origin_warehouse: String(defaultValues.origin_warehouse),
+      route: defaultValues.route != null ? String(defaultValues.route) : 'none',
+      destination_address: defaultValues.destination_address,
+      destination_city: defaultValues.destination_city,
+      destination_country: defaultValues.destination_country,
+      status: defaultValues.status,
+      scheduled_delivery_date: defaultValues.scheduled_delivery_date,
+      actual_delivery_date: defaultValues.actual_delivery_date ?? '',
+      total_weight_kg: defaultValues.total_weight_kg,
+      notes: defaultValues.notes ?? '',
+    },
+  });
+
+  async function handleSubmit(values: ShipmentEditValues) {
+    const data: ShipmentUpdate = {
+      tracking_number: values.tracking_number.trim(),
+      customer: parseInt(values.customer, 10),
+      origin_warehouse: parseInt(values.origin_warehouse, 10),
+      route: values.route === 'none' ? null : parseInt(values.route, 10),
+      destination_address: values.destination_address.trim(),
+      destination_city: values.destination_city.trim(),
+      destination_country: values.destination_country.trim(),
+      status: values.status as ShipmentStatus,
+      scheduled_delivery_date: values.scheduled_delivery_date,
+      actual_delivery_date: values.actual_delivery_date.trim() || null,
+      total_weight_kg: values.total_weight_kg.trim(),
+      notes: values.notes.trim() || null,
+    };
+    await onSubmit(data);
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="tracking_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>N° Seguimiento *</FormLabel>
+              <FormControl>
+                <Input {...field} className="font-mono" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="customer"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cliente *</FormLabel>
+                <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? '')}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Selecciona cliente" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {customersData?.results.map((c) => (
+                      <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="origin_warehouse"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Almacén origen *</FormLabel>
+                <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? '')}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Selecciona almacén" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {warehousesData?.results.map((w) => (
+                      <SelectItem key={w.id} value={String(w.id)}>{w.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="route"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ruta</FormLabel>
+                <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? 'none')}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Sin ruta" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Sin ruta</SelectItem>
+                    {routesData?.results.map((r) => (
+                      <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="total_weight_kg"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Peso total (kg) *</FormLabel>
+                <FormControl>
+                  <Input {...field} type="text" placeholder="0.00" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="destination_address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dirección destino *</FormLabel>
+              <FormControl><Input {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="destination_city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ciudad destino *</FormLabel>
+                <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="destination_country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>País destino *</FormLabel>
+                <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="scheduled_delivery_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha entrega programada *</FormLabel>
+                <FormControl><Input {...field} type="date" /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="actual_delivery_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha entrega real</FormLabel>
+                <FormControl><Input {...field} type="date" /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado</FormLabel>
+                <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? 'pending')}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="pending">Pendiente</SelectItem>
+                    <SelectItem value="processing">Procesando</SelectItem>
+                    <SelectItem value="in_transit">En tránsito</SelectItem>
+                    <SelectItem value="delivered">Entregado</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                    <SelectItem value="returned">Devuelto</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notas</FormLabel>
+                <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              Guardando…
+            </>
+          ) : (
+            'Guardar'
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
+}

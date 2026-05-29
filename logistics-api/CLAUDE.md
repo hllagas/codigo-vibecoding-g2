@@ -2,6 +2,25 @@
 
 Este archivo provee instrucciones a Claude Code (claude.ai/code) para trabajar en este repositorio.
 
+## Metodología — SDD (Spec Driven Development)
+
+**IMPORTANTE**: Este proyecto usa SDD. Para cualquier tarea de desarrollo (nuevo módulo, feature, cambio en modelos o endpoints), el agente **Orquestador** debe coordinar el flujo obligatorio:
+
+```
+Spec Agent → Implement Agent → Validator Agent
+```
+
+El agente orquestador está definido en `.claude/agents/orchestrator.md`. Siempre seguir este flujo antes de escribir código.
+
+- [Orquestador](.claude/agents/orchestrator.md) — coordina el flujo SDD
+- [Spec](.claude/agents/spec.md) — crea `spec/<modulo>.md` con tareas exactas
+- [Implement](.claude/agents/implement.md) — implementa código según el spec
+- [Validator](.claude/agents/validator.md) — audita la implementación, reporta errores
+
+Alcance MVP completo en [`docs/mvp-scope.md`](docs/mvp-scope.md).
+
+---
+
 ## Skills
 
 - **code-review** (plugin `code-review@claude-plugins-official`) está instalado en este proyecto. Usar siempre sus skills disponibles al trabajar con modelos, vistas, serializers, migraciones, tests o cualquier tarea Django/DRF.
@@ -140,14 +159,28 @@ logistics-api/
 
 ## Estado actual
 
-- `products/` existe pero **no está registrada en `INSTALLED_APPS`** y no tiene modelos, vistas ni URLs — es un scaffold vacío.
-- DRF está instalado pero no configurado en `settings.py` — agregar `'rest_framework'` a `INSTALLED_APPS` y registrar la app `products` antes de usar cualquiera de los dos.
-- Base de datos: SQLite3 en desarrollo (`db.sqlite3`). `psycopg2-binary` está instalado para migración futura a PostgreSQL.
-- `SECRET_KEY` está hardcodeado en `settings.py` — mover a `.env` + `python-decouple` (ya está en requirements) antes de cualquier uso en producción.
+Fases completadas vía SDD (Spec → Implement → Validate):
+
+| Fase | App | Estado |
+|---|---|---|
+| 1 | `config` | ✓ JWT, DRF, grupos de permisos |
+| 2 | `apps.warehouses` | ✓ CRUD completo |
+| 3 | `apps.suppliers` | ✓ CRUD completo |
+| 4 | `apps.customers` | ✓ CRUD + registro público |
+| 5 | `apps.drivers` | ✓ CRUD + registro público |
+| 6 | `apps.transports` | ✓ CRUD completo |
+| 7 | `apps.products` | ✓ CRUD + update_stock |
+| 8 | `apps.routes` | ✓ CRUD completo |
+| 9 | `apps.shipments` | ✓ CRUD + update_status + assign_transport |
+
+- Todas las apps viven bajo `apps/` con `name = 'apps.<nombre>'` en `apps.py`
+- Base de datos: SQLite3 en desarrollo. PostgreSQL en Railway (producción)
+- `SECRET_KEY` y variables de entorno en `.env` vía python-decouple
 
 ## Agregar una nueva app
 
-1. `python manage.py startapp <name>`
-2. Agregar `'<name>'` a `INSTALLED_APPS` en `config/settings.py`
-3. Crear `<name>/urls.py`, incluirlo en `config/urls.py`
-4. Definir modelos → `makemigrations` → `migrate`
+1. `python manage.py startapp <name> apps/<name>`
+2. Actualizar `apps/<name>/apps.py`: `name = 'apps.<name>'`
+3. Agregar `'apps.<name>'` a `INSTALLED_APPS` en `config/settings.py`
+4. Crear `apps/<name>/urls.py`, incluirlo en `config/urls.py` como `include('apps.<name>.urls')`
+5. Definir modelos → `makemigrations apps.<name>` → `migrate`
