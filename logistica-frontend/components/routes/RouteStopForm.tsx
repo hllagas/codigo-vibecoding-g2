@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DateTimePicker } from '@/components/ui/DateTimePicker';
 import type { RouteStopCreate } from '@/types/route';
 
 const stopSchema = z.object({
@@ -158,7 +159,7 @@ export function RouteStopForm({ defaultValues, onSubmit, isSubmitting }: RouteSt
               <FormItem>
                 <FormLabel>Llegada estimada</FormLabel>
                 <FormControl>
-                  <Input {...field} type="datetime-local" />
+                  <DateTimePicker value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -171,7 +172,7 @@ export function RouteStopForm({ defaultValues, onSubmit, isSubmitting }: RouteSt
               <FormItem>
                 <FormLabel>Llegada real</FormLabel>
                 <FormControl>
-                  <Input {...field} type="datetime-local" />
+                  <DateTimePicker value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

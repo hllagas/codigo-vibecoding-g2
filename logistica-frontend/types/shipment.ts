@@ -70,10 +70,13 @@ export type ShipmentStatusUpdate = { status: ShipmentStatus };
 
 export interface ShipmentListParams {
   page?: number;
+  page_size?: number;
   search?: string;
   status?: ShipmentStatus;
   customer?: number;
   origin_warehouse?: number;
   route?: number;
   ordering?: string;
+  created_at__gte?: string;
+  created_at__lte?: string;
 }

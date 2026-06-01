@@ -17,6 +17,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { getApiError } from '@/lib/errorUtils';
 import type { Product, ProductCreate, ProductListParams } from '@/types/product';
 
 const PAGE_SIZE = 20;
@@ -48,15 +49,23 @@ export default function ProductsPage() {
 
   async function handleDeleteConfirm() {
     if (!productToDelete) return;
-    await deleteMutation.mutateAsync(productToDelete.id);
-    setProductToDelete(null);
-    toast.success('Producto eliminado');
+    try {
+      await deleteMutation.mutateAsync(productToDelete.id);
+      setProductToDelete(null);
+      toast.success('Producto eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleCreate(data: ProductCreate) {
-    await createMutation.mutateAsync(data);
-    setIsCreateOpen(false);
-    toast.success('Producto creado');
+    try {
+      await createMutation.mutateAsync(data);
+      setIsCreateOpen(false);
+      toast.success('Producto creado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   return (

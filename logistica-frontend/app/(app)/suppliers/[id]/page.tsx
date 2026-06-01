@@ -18,6 +18,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { SupplierForm } from '@/components/suppliers/SupplierForm';
 import { useSupplier } from '@/hooks/useSupplier';
 import { useUpdateSupplier, useDeleteSupplier } from '@/hooks/useSupplierMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { SupplierCreate } from '@/types/supplier';
 
 export default function SupplierDetailPage() {
@@ -34,16 +35,24 @@ export default function SupplierDetailPage() {
 
   async function handleUpdate(formData: SupplierCreate) {
     if (!id) return;
-    await updateMutation.mutateAsync({ id, data: formData });
-    toast.success('Proveedor actualizado');
-    setEditMode(false);
+    try {
+      await updateMutation.mutateAsync({ id, data: formData });
+      toast.success('Proveedor actualizado');
+      setEditMode(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!id) return;
-    await deleteMutation.mutateAsync(id);
-    toast.success('Proveedor eliminado');
-    router.push('/suppliers');
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success('Proveedor eliminado');
+      router.push('/suppliers');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   function formatDate(iso: string) {

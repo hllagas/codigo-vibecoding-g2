@@ -33,6 +33,7 @@ export type TransportUpdate = Partial<TransportCreate>;
 
 export interface TransportListParams {
   page?: number;
+  page_size?: number;
   search?: string;
   transport_type?: TransportType;
   is_active?: boolean;

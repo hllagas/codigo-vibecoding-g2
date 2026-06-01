@@ -51,6 +51,7 @@ export type RouteStopUpdate = Partial<RouteStopCreate>;
 
 export interface RouteListParams {
   page?: number;
+  page_size?: number;
   search?: string;
   status?: RouteStatus;
   transport?: number;

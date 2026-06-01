@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { getApiError } from '@/lib/errorUtils';
 import type { TransportCreate } from '@/types/transport';
 
 export default function TransportDetailPage() {
@@ -33,15 +34,23 @@ export default function TransportDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   async function handleUpdate(data: TransportCreate) {
-    await updateMutation.mutateAsync({ id, data });
-    setIsEditing(false);
-    toast.success('Transporte actualizado');
+    try {
+      await updateMutation.mutateAsync({ id, data });
+      setIsEditing(false);
+      toast.success('Transporte actualizado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
-    await deleteMutation.mutateAsync(id);
-    router.push('/transports');
-    toast.success('Transporte eliminado');
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.push('/transports');
+      toast.success('Transporte eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   if (isLoading) {

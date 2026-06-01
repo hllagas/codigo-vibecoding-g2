@@ -28,7 +28,7 @@ const transportSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   plate_number: z.string().min(1, 'La matrícula es requerida'),
   transport_type: z.enum(['truck', 'van', 'motorcycle', 'bicycle'], {
-    errorMap: () => ({ message: 'Selecciona un tipo de transporte' }),
+    error: 'Selecciona un tipo de transporte',
   }),
   capacity_kg: z.string().min(1, 'La capacidad es requerida'),
   driver: z.string(),
@@ -156,7 +156,11 @@ export function TransportForm({ defaultValues, onSubmit, isSubmitting }: Transpo
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sin conductor" />
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value && field.value !== 'none'
+                          ? (drivers.find(d => String(d.id) === field.value)?.license_number ?? field.value)
+                          : <span className="text-muted-foreground">Sin conductor</span>}
+                      </span>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

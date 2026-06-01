@@ -19,6 +19,7 @@ import { CustomerTypeBadge } from '@/components/customers/CustomerTypeBadge';
 import { CustomerForm } from '@/components/customers/CustomerForm';
 import { useCustomer } from '@/hooks/useCustomer';
 import { useUpdateCustomer, useDeleteCustomer } from '@/hooks/useCustomerMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { CustomerCreate } from '@/types/customer';
 
 export default function CustomerDetailPage() {
@@ -35,16 +36,24 @@ export default function CustomerDetailPage() {
 
   async function handleUpdate(formData: CustomerCreate) {
     if (!id) return;
-    await updateMutation.mutateAsync({ id, data: formData });
-    toast.success('Cliente actualizado');
-    setEditMode(false);
+    try {
+      await updateMutation.mutateAsync({ id, data: formData });
+      toast.success('Cliente actualizado');
+      setEditMode(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!id) return;
-    await deleteMutation.mutateAsync(id);
-    toast.success('Cliente eliminado');
-    router.push('/customers');
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success('Cliente eliminado');
+      router.push('/customers');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   function formatDate(iso: string) {

@@ -19,7 +19,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import type { ProductCreate } from '@/types/product';
@@ -167,7 +166,11 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting }: ProductFo
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sin proveedor" />
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value && field.value !== 'none'
+                          ? (suppliers.find(s => String(s.id) === field.value)?.name ?? field.value)
+                          : <span className="text-muted-foreground">Sin proveedor</span>}
+                      </span>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

@@ -16,6 +16,7 @@ import { CustomerFilters } from '@/components/customers/CustomerFilters';
 import { CustomerForm } from '@/components/customers/CustomerForm';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useCreateCustomer, useDeleteCustomer } from '@/hooks/useCustomerMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { Customer, CustomerCreate, CustomerListParams } from '@/types/customer';
 
 const PAGE_SIZE = 20;
@@ -42,16 +43,24 @@ export default function CustomersPage() {
   }
 
   async function handleCreate(formData: CustomerCreate) {
-    await createMutation.mutateAsync(formData);
-    toast.success('Cliente creado');
-    setCreateOpen(false);
+    try {
+      await createMutation.mutateAsync(formData);
+      toast.success('Cliente creado');
+      setCreateOpen(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget.id);
-    toast.success('Cliente eliminado');
-    setDeleteTarget(null);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success('Cliente eliminado');
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   function handleParamsChange(newParams: CustomerListParams) {

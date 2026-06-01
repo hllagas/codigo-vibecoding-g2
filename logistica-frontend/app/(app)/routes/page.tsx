@@ -18,6 +18,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { getApiError } from '@/lib/errorUtils';
 import type { Route, RouteCreate, RouteListParams } from '@/types/route';
 
 const PAGE_SIZE = 20;
@@ -50,15 +51,23 @@ export default function RoutesPage() {
 
   async function handleDeleteConfirm() {
     if (!routeToDelete) return;
-    await deleteMutation.mutateAsync(routeToDelete.id);
-    setRouteToDelete(null);
-    toast.success('Ruta eliminada');
+    try {
+      await deleteMutation.mutateAsync(routeToDelete.id);
+      setRouteToDelete(null);
+      toast.success('Ruta eliminada');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleCreate(data: RouteCreate) {
-    await createMutation.mutateAsync(data);
-    setIsCreateOpen(false);
-    toast.success('Ruta creada');
+    try {
+      await createMutation.mutateAsync(data);
+      setIsCreateOpen(false);
+      toast.success('Ruta creada');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   return (

@@ -16,6 +16,7 @@ import { SupplierFilters } from '@/components/suppliers/SupplierFilters';
 import { SupplierForm } from '@/components/suppliers/SupplierForm';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useCreateSupplier, useDeleteSupplier } from '@/hooks/useSupplierMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { Supplier, SupplierCreate, SupplierListParams } from '@/types/supplier';
 
 const PAGE_SIZE = 20;
@@ -42,16 +43,24 @@ export default function SuppliersPage() {
   }
 
   async function handleCreate(formData: SupplierCreate) {
-    await createMutation.mutateAsync(formData);
-    toast.success('Proveedor creado');
-    setCreateOpen(false);
+    try {
+      await createMutation.mutateAsync(formData);
+      toast.success('Proveedor creado');
+      setCreateOpen(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget.id);
-    toast.success('Proveedor eliminado');
-    setDeleteTarget(null);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success('Proveedor eliminado');
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   function handleParamsChange(newParams: SupplierListParams) {

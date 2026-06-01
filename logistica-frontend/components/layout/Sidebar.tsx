@@ -13,12 +13,14 @@ import {
   Ship,
   LogOut,
   X,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/suppliers", label: "Proveedores", icon: Building2 },
   { href: "/warehouses", label: "Almacenes", icon: Warehouse },
   { href: "/customers", label: "Clientes", icon: Users },
@@ -40,14 +42,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
+      {/* Overlay for mobile — kept in DOM for CSS fade transition */}
+      <div
+        className={cn(
+          "fixed inset-0 z-20 bg-black/50 lg:hidden transition-opacity duration-300",
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
       {/* Sidebar */}
       <aside

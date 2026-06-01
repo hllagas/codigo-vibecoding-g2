@@ -30,6 +30,7 @@ export type DriverUpdate = Partial<DriverCreate>;
 
 export interface DriverListParams {
   page?: number;
+  page_size?: number;
   search?: string;
   is_available?: boolean;
   ordering?: string;

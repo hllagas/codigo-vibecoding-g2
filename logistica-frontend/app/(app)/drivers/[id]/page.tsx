@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { getApiError } from '@/lib/errorUtils';
 import type { DriverCreate } from '@/types/driver';
 
 export default function DriverDetailPage() {
@@ -33,15 +34,23 @@ export default function DriverDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   async function handleUpdate(data: DriverCreate) {
-    await updateMutation.mutateAsync({ id, data });
-    setIsEditing(false);
-    toast.success('Conductor actualizado');
+    try {
+      await updateMutation.mutateAsync({ id, data });
+      setIsEditing(false);
+      toast.success('Conductor actualizado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
-    await deleteMutation.mutateAsync(id);
-    router.push('/drivers');
-    toast.success('Conductor eliminado');
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.push('/drivers');
+      toast.success('Conductor eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   if (isLoading) {

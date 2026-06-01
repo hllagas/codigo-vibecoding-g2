@@ -17,6 +17,7 @@ import { ShipmentCreateForm } from '@/components/shipments/ShipmentCreateForm';
 import { useShipments } from '@/hooks/useShipments';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useCreateShipment, useDeleteShipment } from '@/hooks/useShipmentMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { Shipment, ShipmentCreate, ShipmentListParams } from '@/types/shipment';
 
 const PAGE_SIZE = 20;
@@ -40,16 +41,24 @@ export default function ShipmentsPage() {
   const totalPages = data ? Math.ceil(data.count / PAGE_SIZE) : 1;
 
   async function handleCreate(payload: ShipmentCreate) {
-    await createMutation.mutateAsync(payload);
-    toast.success('Envío creado');
-    setCreateOpen(false);
+    try {
+      await createMutation.mutateAsync(payload);
+      toast.success('Envío creado');
+      setCreateOpen(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget.id);
-    toast.success('Envío eliminado');
-    setDeleteTarget(null);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success('Envío eliminado');
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   return (

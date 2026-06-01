@@ -20,6 +20,7 @@ import { WarehouseStockTable } from '@/components/warehouses/WarehouseStockTable
 import { useWarehouse } from '@/hooks/useWarehouse';
 import { useWarehouseStock } from '@/hooks/useWarehouseStock';
 import { useUpdateWarehouse, useDeleteWarehouse } from '@/hooks/useWarehouseMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { WarehouseCreate } from '@/types/warehouse';
 
 export default function WarehouseDetailPage() {
@@ -37,16 +38,24 @@ export default function WarehouseDetailPage() {
 
   async function handleUpdate(formData: WarehouseCreate) {
     if (!id) return;
-    await updateMutation.mutateAsync({ id, data: formData });
-    toast.success('Almacén actualizado');
-    setEditMode(false);
+    try {
+      await updateMutation.mutateAsync({ id, data: formData });
+      toast.success('Almacén actualizado');
+      setEditMode(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!id) return;
-    await deleteMutation.mutateAsync(id);
-    toast.success('Almacén eliminado');
-    router.push('/warehouses');
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success('Almacén eliminado');
+      router.push('/warehouses');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   function formatDate(iso: string) {

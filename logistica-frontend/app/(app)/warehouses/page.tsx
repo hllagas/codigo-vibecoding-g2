@@ -16,6 +16,7 @@ import { WarehouseFilters } from '@/components/warehouses/WarehouseFilters';
 import { WarehouseForm } from '@/components/warehouses/WarehouseForm';
 import { useWarehouses } from '@/hooks/useWarehouses';
 import { useCreateWarehouse, useDeleteWarehouse } from '@/hooks/useWarehouseMutations';
+import { getApiError } from '@/lib/errorUtils';
 import type { Warehouse, WarehouseCreate, WarehouseListParams } from '@/types/warehouse';
 
 const PAGE_SIZE = 20;
@@ -42,16 +43,24 @@ export default function WarehousesPage() {
   }
 
   async function handleCreate(formData: WarehouseCreate) {
-    await createMutation.mutateAsync(formData);
-    toast.success('Almacén creado');
-    setCreateOpen(false);
+    try {
+      await createMutation.mutateAsync(formData);
+      toast.success('Almacén creado');
+      setCreateOpen(false);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget.id);
-    toast.success('Almacén eliminado');
-    setDeleteTarget(null);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success('Almacén eliminado');
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   function handleParamsChange(newParams: WarehouseListParams) {

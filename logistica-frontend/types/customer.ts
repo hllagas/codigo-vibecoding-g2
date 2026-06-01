@@ -20,6 +20,7 @@ export type CustomerUpdate = Partial<CustomerCreate>;
 
 export interface CustomerListParams {
   page?: number;
+  page_size?: number;
   search?: string;
   customer_type?: CustomerType;
   city?: string;

@@ -18,6 +18,7 @@ export type ProductUpdate = Partial<ProductCreate>;
 
 export interface ProductListParams {
   page?: number;
+  page_size?: number;
   search?: string;
   category?: string;
   supplier?: number;

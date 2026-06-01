@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useWarehouses } from '@/hooks/useWarehouses';
 import { useRoutes } from '@/hooks/useRoutes';
@@ -148,7 +149,13 @@ export function ShipmentCreateForm({ onSubmit, isSubmitting }: ShipmentCreateFor
                 <FormLabel>Cliente *</FormLabel>
                 <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? '')}>
                   <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Selecciona cliente" /></SelectTrigger>
+                    <SelectTrigger>
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value
+                          ? (customersData?.results.find(c => String(c.id) === field.value)?.name ?? field.value)
+                          : <span className="text-muted-foreground">Selecciona cliente</span>}
+                      </span>
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {customersData?.results.map((c) => (
@@ -168,7 +175,13 @@ export function ShipmentCreateForm({ onSubmit, isSubmitting }: ShipmentCreateFor
                 <FormLabel>Almacén origen *</FormLabel>
                 <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? '')}>
                   <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Selecciona almacén" /></SelectTrigger>
+                    <SelectTrigger>
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value
+                          ? (warehousesData?.results.find(w => String(w.id) === field.value)?.name ?? field.value)
+                          : <span className="text-muted-foreground">Selecciona almacén</span>}
+                      </span>
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {warehousesData?.results.map((w) => (
@@ -191,7 +204,13 @@ export function ShipmentCreateForm({ onSubmit, isSubmitting }: ShipmentCreateFor
                 <FormLabel>Ruta</FormLabel>
                 <Select value={field.value} onValueChange={(v: string | null) => field.onChange(v ?? 'none')}>
                   <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Sin ruta" /></SelectTrigger>
+                    <SelectTrigger>
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value && field.value !== 'none'
+                          ? (routesData?.results.find(r => String(r.id) === field.value)?.name ?? field.value)
+                          : <span className="text-muted-foreground">Sin ruta</span>}
+                      </span>
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="none">Sin ruta</SelectItem>
@@ -263,7 +282,9 @@ export function ShipmentCreateForm({ onSubmit, isSubmitting }: ShipmentCreateFor
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fecha entrega programada *</FormLabel>
-                <FormControl><Input {...field} type="date" /></FormControl>
+                <FormControl>
+                  <DatePicker value={field.value} onChange={field.onChange} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -274,7 +295,9 @@ export function ShipmentCreateForm({ onSubmit, isSubmitting }: ShipmentCreateFor
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fecha entrega real</FormLabel>
-                <FormControl><Input {...field} type="date" /></FormControl>
+                <FormControl>
+                  <DatePicker value={field.value} onChange={field.onChange} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -344,7 +367,13 @@ export function ShipmentCreateForm({ onSubmit, isSubmitting }: ShipmentCreateFor
                     {index === 0 && <FormLabel>Producto *</FormLabel>}
                     <Select value={f.value} onValueChange={(v: string | null) => f.onChange(v ?? '')}>
                       <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger>
+                        <SelectTrigger>
+                          <span className="flex flex-1 text-left truncate text-sm">
+                            {f.value
+                              ? (productsData?.results.find(p => String(p.id) === f.value)?.name ?? f.value)
+                              : <span className="text-muted-foreground">Selecciona</span>}
+                          </span>
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {productsData?.results.map((p) => (

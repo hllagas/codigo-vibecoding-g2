@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { getApiError } from '@/lib/errorUtils';
 import type { ProductCreate } from '@/types/product';
 
 export default function ProductDetailPage() {
@@ -39,15 +40,23 @@ export default function ProductDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   async function handleUpdate(data: ProductCreate) {
-    await updateMutation.mutateAsync({ id, data });
-    setIsEditing(false);
-    toast.success('Producto actualizado');
+    try {
+      await updateMutation.mutateAsync({ id, data });
+      setIsEditing(false);
+      toast.success('Producto actualizado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
-    await deleteMutation.mutateAsync(id);
-    router.push('/products');
-    toast.success('Producto eliminado');
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.push('/products');
+      toast.success('Producto eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   if (isLoading) {

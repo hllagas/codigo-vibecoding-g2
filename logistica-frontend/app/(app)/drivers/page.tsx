@@ -16,6 +16,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { getApiError } from '@/lib/errorUtils';
 import type { Driver, DriverCreate, DriverListParams } from '@/types/driver';
 
 const PAGE_SIZE = 20;
@@ -40,15 +41,23 @@ export default function DriversPage() {
 
   async function handleDeleteConfirm() {
     if (!driverToDelete) return;
-    await deleteMutation.mutateAsync(driverToDelete.id);
-    setDriverToDelete(null);
-    toast.success('Conductor eliminado');
+    try {
+      await deleteMutation.mutateAsync(driverToDelete.id);
+      setDriverToDelete(null);
+      toast.success('Conductor eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleCreate(data: DriverCreate) {
-    await createMutation.mutateAsync(data);
-    setIsCreateOpen(false);
-    toast.success('Conductor creado');
+    try {
+      await createMutation.mutateAsync(data);
+      setIsCreateOpen(false);
+      toast.success('Conductor creado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   const driverFullName = driverToDelete

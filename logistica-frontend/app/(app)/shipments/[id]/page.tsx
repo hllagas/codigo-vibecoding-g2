@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { getApiError } from '@/lib/errorUtils';
 import type { ShipmentStatus, ShipmentUpdate } from '@/types/shipment';
 
 export default function ShipmentDetailPage() {
@@ -53,20 +54,32 @@ export default function ShipmentDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   async function handleUpdate(data: ShipmentUpdate) {
-    await updateMutation.mutateAsync({ id, data });
-    setIsEditing(false);
-    toast.success('Envío actualizado');
+    try {
+      await updateMutation.mutateAsync({ id, data });
+      setIsEditing(false);
+      toast.success('Envío actualizado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleStatusTransition(newStatus: ShipmentStatus) {
-    await statusMutation.mutateAsync({ id, status: newStatus });
-    toast.success('Estado actualizado');
+    try {
+      await statusMutation.mutateAsync({ id, status: newStatus });
+      toast.success('Estado actualizado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
-    await deleteMutation.mutateAsync(id);
-    router.push('/shipments');
-    toast.success('Envío eliminado');
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.push('/shipments');
+      toast.success('Envío eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   if (isLoading) {

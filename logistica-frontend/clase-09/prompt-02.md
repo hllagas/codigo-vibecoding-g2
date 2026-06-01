@@ -1,18 +1,16 @@
-a nuestro stack vamos a agregar las siguientes herramientas: 
-                                                                                                                                                                                                                  
-  - shadcn para componentes                                                                                                                                                                                       
+a nuestro stack vamos a agregar las siguientes herramientas:  
+  - shadcn para componentes                                                                                                                                       
   - tanStack table para todas las tablas del proyect                                                                                                                                                              
-  - tanStack Query para el manejo de peticiones                                                                                                                                                                   
-  - Axios para hacer las peticiones                                                                                                                                                                               
-  - para el manejo del estado global investigue que va mejor con TanStack Query                                                                                                                                   
-                                                                                                                                                                                                                  
+  - tanStack Query para el manejo de peticiones                                                                                
+  - Axios para hacer las peticiones                                                                                            
+  - para el manejo del estado global investigue que va mejor con TanStack Query                                                                                                                      
   Vamos a contruir un módulo a la vez, usando la metodología SDD, por ende vamos a crear 4 agentes:                                                                                                               
   - Spect: Se encargará de analizar el módulo que vamos a contruir y crear la lista de tareas, esta lista debe ser aprobada por un humano, antes de pasar a la fase de implement, recordemos leer siempre los     
   archivos de la carpeta docs/*.md para tener contexto del proyecto de backend                                                                                                                                    
   - Implement: Se encargará de crear el codigo basado en los spects, esté código debera seguir las buenas prácticas del framework nextjs y solid                                                                  
   - Validator: Se encargará de vficar que el código generado en implement cumpla realmente los specs, ademas actualizar el spec file marcado como hecho la tarea.                                                 
   - Orchester: Se encargará de que cada fase del proyecto use SDD, por ende debemos referencia al Orchester en el archivo claude.md                                                                               
-                                                                                                                                                                                                                  
+            
   Previo a esto vamos a crear en docs el archivo mvp.md donde esta descrito el trabajo que se hará cada módulo, fuera de auth, todos son crud.                                                                    
-                                                                                                                                                                                                                  
+                                        
   regla importante siempre trabajar un modulo a la vez revisando el documento para saber el orden adecuado de los módulos a trabajar

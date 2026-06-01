@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DateTimePicker } from '@/components/ui/DateTimePicker';
 import {
   Select,
   SelectContent,
@@ -30,7 +31,7 @@ const routeSchema = z.object({
   origin_warehouse: z.string().min(1, 'El almacén es requerido'),
   transport: z.string().min(1, 'El transporte es requerido'),
   status: z.enum(['planned', 'in_progress', 'completed', 'cancelled'], {
-    errorMap: () => ({ message: 'Selecciona un estado' }),
+    error: 'Selecciona un estado',
   }),
   estimated_duration_hours: z.string(),
   started_at: z.string(),
@@ -109,7 +110,11 @@ export function RouteForm({ defaultValues, onSubmit, isSubmitting }: RouteFormPr
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona almacén" />
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value
+                          ? (warehouses.find(w => String(w.id) === field.value)?.name ?? field.value)
+                          : <span className="text-muted-foreground">Selecciona almacén</span>}
+                      </span>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -136,7 +141,11 @@ export function RouteForm({ defaultValues, onSubmit, isSubmitting }: RouteFormPr
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona transporte" />
+                      <span className="flex flex-1 text-left truncate text-sm">
+                        {field.value
+                          ? (transports.find(t => String(t.id) === field.value)?.name ?? field.value)
+                          : <span className="text-muted-foreground">Selecciona transporte</span>}
+                      </span>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -203,7 +212,7 @@ export function RouteForm({ defaultValues, onSubmit, isSubmitting }: RouteFormPr
               <FormItem>
                 <FormLabel>Inicio</FormLabel>
                 <FormControl>
-                  <Input {...field} type="datetime-local" />
+                  <DateTimePicker value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -216,7 +225,7 @@ export function RouteForm({ defaultValues, onSubmit, isSubmitting }: RouteFormPr
               <FormItem>
                 <FormLabel>Finalización</FormLabel>
                 <FormControl>
-                  <Input {...field} type="datetime-local" />
+                  <DateTimePicker value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

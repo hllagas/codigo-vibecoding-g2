@@ -16,6 +16,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { getApiError } from '@/lib/errorUtils';
 import type { Transport, TransportCreate, TransportListParams } from '@/types/transport';
 
 const PAGE_SIZE = 20;
@@ -40,15 +41,23 @@ export default function TransportsPage() {
 
   async function handleDeleteConfirm() {
     if (!transportToDelete) return;
-    await deleteMutation.mutateAsync(transportToDelete.id);
-    setTransportToDelete(null);
-    toast.success('Transporte eliminado');
+    try {
+      await deleteMutation.mutateAsync(transportToDelete.id);
+      setTransportToDelete(null);
+      toast.success('Transporte eliminado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleCreate(data: TransportCreate) {
-    await createMutation.mutateAsync(data);
-    setIsCreateOpen(false);
-    toast.success('Transporte creado');
+    try {
+      await createMutation.mutateAsync(data);
+      setIsCreateOpen(false);
+      toast.success('Transporte creado');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   return (

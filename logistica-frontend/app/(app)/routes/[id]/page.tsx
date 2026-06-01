@@ -27,6 +27,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { getApiError } from '@/lib/errorUtils';
 import type { RouteCreate, RouteStop, RouteStopCreate } from '@/types/route';
 
 export default function RouteDetailPage() {
@@ -57,34 +58,50 @@ export default function RouteDetailPage() {
   const [stopToDelete, setStopToDelete] = useState<RouteStop | null>(null);
 
   async function handleUpdate(data: RouteCreate) {
-    await updateMutation.mutateAsync({ id, data });
-    setIsEditing(false);
-    toast.success('Ruta actualizada');
+    try {
+      await updateMutation.mutateAsync({ id, data });
+      setIsEditing(false);
+      toast.success('Ruta actualizada');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleDeleteConfirm() {
-    await deleteMutation.mutateAsync(id);
-    router.push('/routes');
-    toast.success('Ruta eliminada');
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.push('/routes');
+      toast.success('Ruta eliminada');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   async function handleStopSubmit(data: RouteStopCreate) {
-    if (editingStop) {
-      await updateStopMutation.mutateAsync({ stopId: editingStop.id, data });
-      toast.success('Parada actualizada');
-    } else {
-      await createStopMutation.mutateAsync(data);
-      toast.success('Parada añadida');
+    try {
+      if (editingStop) {
+        await updateStopMutation.mutateAsync({ stopId: editingStop.id, data });
+        toast.success('Parada actualizada');
+      } else {
+        await createStopMutation.mutateAsync(data);
+        toast.success('Parada añadida');
+      }
+      setIsStopFormOpen(false);
+      setEditingStop(null);
+    } catch (err) {
+      toast.error(getApiError(err));
     }
-    setIsStopFormOpen(false);
-    setEditingStop(null);
   }
 
   async function handleStopDeleteConfirm() {
     if (!stopToDelete) return;
-    await deleteStopMutation.mutateAsync(stopToDelete.id);
-    setStopToDelete(null);
-    toast.success('Parada eliminada');
+    try {
+      await deleteStopMutation.mutateAsync(stopToDelete.id);
+      setStopToDelete(null);
+      toast.success('Parada eliminada');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
   }
 
   if (isLoading) {

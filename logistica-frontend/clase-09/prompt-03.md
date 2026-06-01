@@ -1,0 +1,1 @@
+Analiza los modulos creados y revisa que graficos podemos implementar en el dashboard, crea una lista. Para los graficos vamos a usar la libreria Tremor de NextJS, el objetivo de esto es integrar graficos estadisticos con filtros sea por rango de fechas, tipos, etc, para poder tener visibilidad de la empresa en todo momento

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { DriverCreate } from '@/types/driver';
 
 const driverSchema = z.object({
@@ -96,7 +97,7 @@ export function DriverForm({ defaultValues, onSubmit, isSubmitting }: DriverForm
               <FormItem>
                 <FormLabel>Vencimiento licencia *</FormLabel>
                 <FormControl>
-                  <Input {...field} type="date" />
+                  <DatePicker value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

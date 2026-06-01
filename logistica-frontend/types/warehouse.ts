@@ -18,6 +18,7 @@ export type WarehouseUpdate = Partial<WarehouseCreate>;
 
 export interface WarehouseListParams {
   page?: number;
+  page_size?: number;
   search?: string;       // name | address | city
   city?: string;
   country?: string;
