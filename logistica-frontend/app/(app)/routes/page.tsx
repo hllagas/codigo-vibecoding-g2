@@ -18,10 +18,9 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { DataTablePagination } from '@/components/ui/DataTablePagination';
 import { getApiError } from '@/lib/errorUtils';
 import type { Route, RouteCreate, RouteListParams } from '@/types/route';
-
-const PAGE_SIZE = 20;
 
 export default function RoutesPage() {
   const router = useRouter();
@@ -90,29 +89,16 @@ export default function RoutesPage() {
         onDelete={handleDeleteClick}
       />
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">
-          Página {params.page ?? 1} de {Math.ceil((data?.count ?? 0) / PAGE_SIZE) || 1}
-        </span>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={(params.page ?? 1) <= 1}
-            onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={data?.next === null}
-            onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))}
-          >
-            Siguiente
-          </Button>
-        </div>
-      </div>
+      {data && (
+        <DataTablePagination
+          count={data.count}
+          page={params.page ?? 1}
+          hasPrevious={!!data.previous}
+          hasNext={!!data.next}
+          onPrev={() => setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))}
+          onNext={() => setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))}
+        />
+      )}
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-2xl">

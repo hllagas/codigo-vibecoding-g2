@@ -25,7 +25,7 @@ import { RecentShipmentsTable } from '@/components/dashboard/RecentShipmentsTabl
 import { ChartErrorBoundary } from '@/components/ui/ChartErrorBoundary';
 
 const SECTION_HEADER =
-  'text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-[0.12em] mb-4 border-b border-border/30 pb-2';
+  'text-xs font-semibold text-muted-foreground uppercase tracking-[0.1em] mb-4 border-b border-border/40 pb-2';
 
 export function DashboardClientSection() {
   const [filters, setFilters] = useState<DashboardFiltersState>(() => {

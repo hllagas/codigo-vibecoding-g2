@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ import { SupplierFilters } from '@/components/suppliers/SupplierFilters';
 import { SupplierForm } from '@/components/suppliers/SupplierForm';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useCreateSupplier, useDeleteSupplier } from '@/hooks/useSupplierMutations';
+import { DataTablePagination } from '@/components/ui/DataTablePagination';
 import { getApiError } from '@/lib/errorUtils';
 import type { Supplier, SupplierCreate, SupplierListParams } from '@/types/supplier';
 
@@ -32,7 +33,6 @@ export default function SuppliersPage() {
   const deleteMutation = useDeleteSupplier();
 
   const currentPage = params.page ?? 1;
-  const totalPages = data ? Math.ceil(data.count / PAGE_SIZE) : 1;
 
   function handleEdit(supplier: Supplier) {
     router.push(`/suppliers/${supplier.id}`);
@@ -96,37 +96,15 @@ export default function SuppliersPage() {
         onDelete={handleDeleteClick}
       />
 
-      {/* Pagination */}
-      {data && data.count > 0 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Mostrando {Math.min((currentPage - 1) * PAGE_SIZE + 1, data.count)}–
-            {Math.min(currentPage * PAGE_SIZE, data.count)} de {data.count}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!data.previous}
-              onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))}
-            >
-              <ChevronLeft />
-              Anterior
-            </Button>
-            <span>
-              Página {currentPage} de {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!data.next}
-              onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))}
-            >
-              Siguiente
-              <ChevronRight />
-            </Button>
-          </div>
-        </div>
+      {data && (
+        <DataTablePagination
+          count={data.count}
+          page={currentPage}
+          hasPrevious={!!data.previous}
+          hasNext={!!data.next}
+          onPrev={() => setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))}
+          onNext={() => setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))}
+        />
       )}
 
       {/* Create Dialog */}
