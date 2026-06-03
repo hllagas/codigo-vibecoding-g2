@@ -1,0 +1,26 @@
+## Animaciones (Framer Motion)                                                                                                                                                                                  
+                                                                                                                                                                                                                  
+  - Page load: stagger words con opacity + y + filter blur                                                                                                                                                        
+  - Scroll reveal: whileInView once, margin -100px                                                                                                                                                                
+  - Floating: animate y [0,-12,0] loop 4s                                                                                                                                                                         
+  - Magnetic button: cursor tracking con useMotionValue + useSpring                                                                                                                                               
+  - Card tilt: rotateX/Y en hover max 5deg                                                                                                                                                                        
+                                                                                                                                                                                                                  
+  ## Regla de Override                                                                                                                                                                                            
+                                                                                                                                                                                                                  
+  Los colores y tipografía de design-system/logisticaweb/MASTER.md tienen precedencia.                                                                                                                            
+  Los efectos (glassmorphism, particles, framer motion) siempre aplican.                                                                                                                                          
+  ## Producto                                                                                                                                                                                                     
+                                                                                                                                                                                                                  
+  - Nombre: Logistica Web                                                                                                                                                                                         
+  - Tagline: "Mueve más, gestiona menos. Logística inteligente para empresas que no se detienen."                                                                                                                 
+  - Usuario objetivo: Gerentes de operaciones y supply chain de medianas y grandes empresas en Latinoamérica                                                                                                      
+                                                                                                                                                                                                                  
+  - Features clave:                                                                                                                                                                                               
+    1. Tracking en tiempo real de flotas y envíos con mapa interactivo                                                                                                                                            
+    2. Dashboard de operaciones con KPIs, alertas y reportes automáticos                                                                                                                                          
+    3. Gestión de rutas optimizadas con IA para reducir costos de combustible                                                                                                                                     
+    4. Integración con ERP, SAP y sistemas de facturación electrónica                                                                                                                                             
+    5. App móvil para conductores con firma digital y evidencia fotográfica                                                                                                                                       
+                                                                                                                                                                                                                  
+  - CTA: Solicitar demo gratuita

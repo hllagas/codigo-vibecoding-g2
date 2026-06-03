@@ -1,25 +1,31 @@
-"use client";
+import type { Metadata } from 'next';
+import { Lexend, Source_Sans_3 } from 'next/font/google';
+import LandingClient from './landing/LandingClient';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/authStore";
+const lexend = Lexend({
+  subsets: ['latin'],
+  variable: '--font-lexend',
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+});
 
-export default function RootPage() {
-  const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+const sourceSans = Source_Sans_3({
+  subsets: ['latin'],
+  variable: '--font-source-sans',
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+});
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/suppliers");
-    } else {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, router]);
+export const metadata: Metadata = {
+  title: 'Logistica Web — Logística inteligente para empresas',
+  description:
+    'Mueve más, gestiona menos. Tracking en tiempo real, rutas optimizadas con IA y dashboards que hablan tu idioma.',
+};
 
-  // Minimal loading state while redirect happens
+export default function HomePage() {
   return (
-    <div className="flex h-screen items-center justify-center bg-background">
-      <div className="size-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+    <div className={`${lexend.variable} ${sourceSans.variable}`}>
+      <LandingClient />
     </div>
   );
 }

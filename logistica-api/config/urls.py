@@ -1,10 +1,17 @@
 from django.contrib import admin
 from django.urls import include, path
+from django.http import HttpResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+
+def landing(request):
+    return HttpResponse("<h1>LogistiFlow — Plataforma de Gestión Logística</h1>")
+
+
 urlpatterns = [
+    path('', landing, name='landing'),
     # Panel de administración de Django
     path('admin/', admin.site.urls),
 

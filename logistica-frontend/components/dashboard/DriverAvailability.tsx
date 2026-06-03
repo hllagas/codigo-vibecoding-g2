@@ -2,13 +2,14 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { MOCK_DRIVER_AVAILABILITY } from '@/lib/mockDashboard';
-import { CHART_TOOLTIP, CHART_COLORS } from '@/lib/chartTheme';
-import { cn } from '@/lib/utils';
+import { CHART_TOOLTIP, CHART_TOOLTIP_ITEM, CHART_TOOLTIP_LABEL, CHART_COLORS } from '@/lib/chartTheme';
 
 const COLORS = [CHART_COLORS.emerald, CHART_COLORS.zinc];
 
 export function DriverAvailability() {
   const total = MOCK_DRIVER_AVAILABILITY.reduce((s, d) => s + d.value, 0);
+  const available = MOCK_DRIVER_AVAILABILITY[0]?.value ?? 0;
+  const availablePct = Math.round((available / total) * 100);
 
   return (
     <div className="rounded-xl border bg-card p-5 shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200">
@@ -29,13 +30,35 @@ export function DriverAvailability() {
               dataKey="value"
               startAngle={90}
               endAngle={-270}
+              strokeWidth={0}
             >
               {MOCK_DRIVER_AVAILABILITY.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
+            {/* Center: available % */}
+            <text
+              x="50%"
+              y="44%"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              style={{ fill: CHART_COLORS.emerald, fontSize: 16, fontWeight: 700 }}
+            >
+              {availablePct}%
+            </text>
+            <text
+              x="50%"
+              y="62%"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              style={{ fill: '#64748b', fontSize: 9 }}
+            >
+              disp.
+            </text>
             <Tooltip
               contentStyle={CHART_TOOLTIP}
+              itemStyle={CHART_TOOLTIP_ITEM}
+              labelStyle={CHART_TOOLTIP_LABEL}
               formatter={(v: number) => [v, 'Conductores']}
             />
           </PieChart>
@@ -51,7 +74,10 @@ export function DriverAvailability() {
                 <span className="text-xs text-muted-foreground">{item.name}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className={cn('text-sm font-bold tabular-nums', i === 0 ? 'text-emerald-400' : 'text-muted-foreground')}>
+                <span
+                  className="text-sm font-bold tabular-nums"
+                  style={{ color: COLORS[i] }}
+                >
                   {item.value}
                 </span>
                 <span className="text-xs text-muted-foreground">

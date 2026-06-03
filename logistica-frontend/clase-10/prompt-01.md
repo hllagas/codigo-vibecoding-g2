@@ -1,0 +1,1 @@
+habilita la ruta del proyecto, vamos a construir una landing page, en este solo habilita la ruta y pon un h1 con el titulo del proyecto

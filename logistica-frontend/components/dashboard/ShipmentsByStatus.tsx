@@ -2,7 +2,7 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { MOCK_SHIPMENTS_BY_STATUS } from '@/lib/mockDashboard';
-import { CHART_TOOLTIP } from '@/lib/chartTheme';
+import { CHART_TOOLTIP, CHART_TOOLTIP_ITEM, CHART_TOOLTIP_LABEL } from '@/lib/chartTheme';
 import { cn } from '@/lib/utils';
 import type { DashboardFiltersState } from '@/types/dashboard';
 
@@ -23,8 +23,8 @@ export function ShipmentsByStatus({ filters }: ShipmentsByStatusProps) {
       </div>
 
       <div className="flex items-center gap-4 flex-1">
-        {/* Recharts donut */}
-        <div className="shrink-0">
+        {/* Recharts donut with center label */}
+        <div className="shrink-0 relative">
           <ResponsiveContainer width={130} height={130}>
             <PieChart>
               <Pie
@@ -43,8 +43,28 @@ export function ShipmentsByStatus({ filters }: ShipmentsByStatusProps) {
                   <Cell key={item.name} fill={item.color} />
                 ))}
               </Pie>
+              <text
+                x="50%"
+                y="46%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{ fill: '#f1f5f9', fontSize: 18, fontWeight: 700 }}
+              >
+                {total}
+              </text>
+              <text
+                x="50%"
+                y="62%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{ fill: '#64748b', fontSize: 10 }}
+              >
+                total
+              </text>
               <Tooltip
                 contentStyle={CHART_TOOLTIP}
+                itemStyle={CHART_TOOLTIP_ITEM}
+                labelStyle={CHART_TOOLTIP_LABEL}
                 formatter={(v: number, name: string) => [v, name]}
               />
             </PieChart>
