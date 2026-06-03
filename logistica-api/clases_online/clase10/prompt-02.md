@@ -1,0 +1,1 @@
+los cambios estan correctos, ahora falta un endpoint para obtener la data de perfil de usuario y colocar el username o el email en el topbar de la web

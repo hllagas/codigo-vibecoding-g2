@@ -1,0 +1,1 @@
+ahora actualmente se pueden crear roles desde la web pero no se puede asignar permisos y tampoco deja asignar rol al usuario, debemos agregar esos endpoint y la ui correspondiente, como también un endpoint para obtener la data de perfil de usuario y colocar el username o el mail en el topbar de la web
