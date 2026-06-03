@@ -13,6 +13,7 @@ import {
   Ship,
   X,
   LayoutDashboard,
+  ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,14 @@ const navGroups = [
   },
 ];
 
+const adminGroup = {
+  label: "Administración",
+  links: [
+    { href: "/users", label: "Usuarios", icon: ShieldCheck },
+    { href: "/roles", label: "Roles", icon: Users },
+  ],
+};
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -59,12 +68,14 @@ function NavContent({
   pathname,
   username,
   initials,
+  isSuperUser,
   onClose,
   showClose,
 }: {
   pathname: string;
   username: string | null;
   initials: string;
+  isSuperUser: boolean;
   onClose: () => void;
   showClose?: boolean;
 }) {
@@ -93,7 +104,7 @@ function NavContent({
 
       {/* Navigation groups */}
       <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
-        {navGroups.map((group) => (
+        {[...navGroups, ...(isSuperUser ? [adminGroup] : [])].map((group) => (
           <div key={group.label ?? "_top"}>
             {group.label && (
               <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
@@ -156,6 +167,7 @@ function NavContent({
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const accessToken = useAuthStore((state) => state.accessToken);
+  const isSuperUser = useAuthStore((state) => state.is_superuser);
 
   let username: string | null = null;
   if (accessToken) {
@@ -168,7 +180,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   }
 
   const initials = username ? username.slice(0, 2).toUpperCase() : "U";
-  const navProps = { pathname, username, initials, onClose };
+  const navProps = { pathname, username, initials, isSuperUser, onClose };
 
   return (
     <>

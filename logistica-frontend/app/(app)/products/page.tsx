@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useProducts } from '@/hooks/useProducts';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useCreateProduct, useDeleteProduct } from '@/hooks/useProductMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { ProductTable } from '@/components/products/ProductTable';
 import { ProductFilters } from '@/components/products/ProductFilters';
 import { ProductForm } from '@/components/products/ProductForm';
@@ -23,6 +24,7 @@ import type { Product, ProductCreate, ProductListParams } from '@/types/product'
 
 export default function ProductsPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<ProductListParams>({ page: 1 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -71,7 +73,7 @@ export default function ProductsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Productos</h1>
-        <Button onClick={() => setIsCreateOpen(true)}>Nuevo producto</Button>
+        {can('add_product') && <Button onClick={() => setIsCreateOpen(true)}>Nuevo producto</Button>}
       </div>
 
       <ProductFilters params={params} onChange={setParams} />
@@ -82,8 +84,8 @@ export default function ProductsPage() {
         data={data?.results ?? []}
         isLoading={isLoading}
         suppliersMap={suppliersMap}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_product') ? handleEdit : undefined}
+        onDelete={can('delete_product') ? handleDeleteClick : undefined}
       />
 
       {data && (

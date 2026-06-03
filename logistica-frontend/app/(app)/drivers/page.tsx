@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useDrivers } from '@/hooks/useDrivers';
 import { useCreateDriver, useDeleteDriver } from '@/hooks/useDriverMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { DriverTable } from '@/components/drivers/DriverTable';
 import { DriverFilters } from '@/components/drivers/DriverFilters';
 import { DriverForm } from '@/components/drivers/DriverForm';
@@ -22,6 +23,7 @@ import type { Driver, DriverCreate, DriverListParams } from '@/types/driver';
 
 export default function DriversPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<DriverListParams>({ page: 1 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
@@ -69,7 +71,7 @@ export default function DriversPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Conductores</h1>
-        <Button onClick={() => setIsCreateOpen(true)}>Nuevo conductor</Button>
+        {can('add_driver') && <Button onClick={() => setIsCreateOpen(true)}>Nuevo conductor</Button>}
       </div>
 
       <DriverFilters params={params} onChange={setParams} />
@@ -79,8 +81,8 @@ export default function DriversPage() {
       <DriverTable
         data={data?.results ?? []}
         isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_driver') ? handleEdit : undefined}
+        onDelete={can('delete_driver') ? handleDeleteClick : undefined}
       />
 
       {data && (

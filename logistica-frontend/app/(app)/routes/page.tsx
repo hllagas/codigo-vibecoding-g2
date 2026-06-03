@@ -7,6 +7,7 @@ import { useRoutes } from '@/hooks/useRoutes';
 import { useWarehouses } from '@/hooks/useWarehouses';
 import { useTransports } from '@/hooks/useTransports';
 import { useCreateRoute, useDeleteRoute } from '@/hooks/useRouteMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { RouteTable } from '@/components/routes/RouteTable';
 import { RouteFilters } from '@/components/routes/RouteFilters';
 import { RouteForm } from '@/components/routes/RouteForm';
@@ -24,6 +25,7 @@ import type { Route, RouteCreate, RouteListParams } from '@/types/route';
 
 export default function RoutesPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<RouteListParams>({ page: 1 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState<Route | null>(null);
@@ -73,7 +75,7 @@ export default function RoutesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Rutas</h1>
-        <Button onClick={() => setIsCreateOpen(true)}>Nueva ruta</Button>
+        {can('add_route') && <Button onClick={() => setIsCreateOpen(true)}>Nueva ruta</Button>}
       </div>
 
       <RouteFilters params={params} onChange={setParams} />
@@ -85,8 +87,8 @@ export default function RoutesPage() {
         isLoading={isLoading}
         warehousesMap={warehousesMap}
         transportsMap={transportsMap}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_route') ? handleEdit : undefined}
+        onDelete={can('delete_route') ? handleDeleteClick : undefined}
       />
 
       {data && (

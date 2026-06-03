@@ -16,6 +16,7 @@ import { CustomerFilters } from '@/components/customers/CustomerFilters';
 import { CustomerForm } from '@/components/customers/CustomerForm';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useCreateCustomer, useDeleteCustomer } from '@/hooks/useCustomerMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { DataTablePagination } from '@/components/ui/DataTablePagination';
 import { getApiError } from '@/lib/errorUtils';
 import type { Customer, CustomerCreate, CustomerListParams } from '@/types/customer';
@@ -24,6 +25,7 @@ const PAGE_SIZE = 20;
 
 export default function CustomersPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<CustomerListParams>({ page: 1 });
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
@@ -72,10 +74,12 @@ export default function CustomersPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Clientes</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus />
-          Nuevo cliente
-        </Button>
+        {can('add_customer') && (
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus />
+            Nuevo cliente
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -92,8 +96,8 @@ export default function CustomersPage() {
       <CustomerTable
         data={data?.results ?? []}
         isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_customer') ? handleEdit : undefined}
+        onDelete={can('delete_customer') ? handleDeleteClick : undefined}
       />
 
       {data && (

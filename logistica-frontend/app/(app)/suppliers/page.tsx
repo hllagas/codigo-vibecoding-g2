@@ -16,6 +16,7 @@ import { SupplierFilters } from '@/components/suppliers/SupplierFilters';
 import { SupplierForm } from '@/components/suppliers/SupplierForm';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useCreateSupplier, useDeleteSupplier } from '@/hooks/useSupplierMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { DataTablePagination } from '@/components/ui/DataTablePagination';
 import { getApiError } from '@/lib/errorUtils';
 import type { Supplier, SupplierCreate, SupplierListParams } from '@/types/supplier';
@@ -24,6 +25,7 @@ const PAGE_SIZE = 20;
 
 export default function SuppliersPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<SupplierListParams>({ page: 1 });
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Supplier | null>(null);
@@ -72,10 +74,12 @@ export default function SuppliersPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Proveedores</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus />
-          Nuevo proveedor
-        </Button>
+        {can('add_supplier') && (
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus />
+            Nuevo proveedor
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -92,8 +96,8 @@ export default function SuppliersPage() {
       <SupplierTable
         data={data?.results ?? []}
         isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_supplier') ? handleEdit : undefined}
+        onDelete={can('delete_supplier') ? handleDeleteClick : undefined}
       />
 
       {data && (

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
-import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -24,6 +24,8 @@ const pageTitles: Record<string, string> = {
   "/routes": "Rutas",
   "/shipments": "Envíos",
   "/profile": "Mi perfil",
+  "/users": "Usuarios",
+  "/roles": "Roles",
 };
 
 function getPageTitle(pathname: string): string {
@@ -41,24 +43,14 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle, className }: HeaderProps) {
   const pathname = usePathname();
-  const accessToken = useAuthStore((state) => state.accessToken);
   const { logout } = useAuth();
+  const { data: profile } = useProfile();
 
   const pageTitle = getPageTitle(pathname);
 
-  let username: string | null = null;
-  if (accessToken) {
-    try {
-      const payload = JSON.parse(atob(accessToken.split(".")[1]));
-      username = payload.username ?? payload.user ?? payload.sub ?? null;
-    } catch {
-      // ignore decode errors
-    }
-  }
-
-  const initials = username
-    ? username.slice(0, 2).toUpperCase()
-    : "U";
+  const displayName = profile?.username ?? "Usuario";
+  const displayEmail = profile?.email ?? "";
+  const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
     <motion.header
@@ -106,11 +98,13 @@ export function Header({ onMenuToggle, className }: HeaderProps) {
             </div>
           </motion.button>
         </PopoverTrigger>
-        <PopoverContent align="end" sideOffset={8} className="w-52 p-1">
+        <PopoverContent align="end" sideOffset={8} className="w-56 p-1">
           {/* User identity */}
           <div className="px-3 py-2.5 border-b border-border mb-1">
-            <p className="text-sm font-semibold truncate">{username ?? "Usuario"}</p>
-            <p className="text-xs text-muted-foreground">Cuenta activa</p>
+            <p className="text-sm font-semibold truncate">{displayName}</p>
+            {displayEmail && (
+              <p className="text-xs text-muted-foreground truncate">{displayEmail}</p>
+            )}
           </div>
 
           {/* Menu items */}

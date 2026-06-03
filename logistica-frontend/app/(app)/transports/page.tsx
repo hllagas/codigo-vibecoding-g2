@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTransports } from '@/hooks/useTransports';
 import { useCreateTransport, useDeleteTransport } from '@/hooks/useTransportMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { TransportTable } from '@/components/transports/TransportTable';
 import { TransportFilters } from '@/components/transports/TransportFilters';
 import { TransportForm } from '@/components/transports/TransportForm';
@@ -22,6 +23,7 @@ import type { Transport, TransportCreate, TransportListParams } from '@/types/tr
 
 export default function TransportsPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<TransportListParams>({ page: 1 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [transportToDelete, setTransportToDelete] = useState<Transport | null>(null);
@@ -63,7 +65,7 @@ export default function TransportsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Transportes</h1>
-        <Button onClick={() => setIsCreateOpen(true)}>Nuevo transporte</Button>
+        {can('add_transport') && <Button onClick={() => setIsCreateOpen(true)}>Nuevo transporte</Button>}
       </div>
 
       <TransportFilters params={params} onChange={setParams} />
@@ -73,8 +75,8 @@ export default function TransportsPage() {
       <TransportTable
         data={data?.results ?? []}
         isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_transport') ? handleEdit : undefined}
+        onDelete={can('delete_transport') ? handleDeleteClick : undefined}
       />
 
       {data && (

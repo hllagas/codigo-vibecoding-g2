@@ -17,6 +17,7 @@ import { ShipmentCreateForm } from '@/components/shipments/ShipmentCreateForm';
 import { useShipments } from '@/hooks/useShipments';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useCreateShipment, useDeleteShipment } from '@/hooks/useShipmentMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { DataTablePagination } from '@/components/ui/DataTablePagination';
 import { getApiError } from '@/lib/errorUtils';
 import type { Shipment, ShipmentCreate, ShipmentListParams } from '@/types/shipment';
@@ -25,6 +26,7 @@ const PAGE_SIZE = 20;
 
 export default function ShipmentsPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<ShipmentListParams>({ page: 1 });
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Shipment | null>(null);
@@ -65,10 +67,12 @@ export default function ShipmentsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Envíos</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus />
-          Nuevo envío
-        </Button>
+        {can('add_shipment') && (
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus />
+            Nuevo envío
+          </Button>
+        )}
       </div>
 
       <ShipmentFilters params={params} onChange={setParams} />
@@ -83,8 +87,8 @@ export default function ShipmentsPage() {
         data={data?.results ?? []}
         isLoading={isLoading}
         customersMap={customersMap}
-        onEdit={(shipment) => router.push(`/shipments/${shipment.id}`)}
-        onDelete={setDeleteTarget}
+        onEdit={can('change_shipment') ? (shipment) => router.push(`/shipments/${shipment.id}`) : undefined}
+        onDelete={can('delete_shipment') ? setDeleteTarget : undefined}
       />
 
       {data && (

@@ -15,9 +15,18 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
+function decodeIsSuperuser(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.is_superuser === true;
+  } catch {
+    return false;
+  }
+}
+
 function hydrateFromStorage(): AuthState {
   if (typeof window === "undefined") {
-    return { accessToken: null, refreshToken: null, isAuthenticated: false };
+    return { accessToken: null, refreshToken: null, isAuthenticated: false, is_superuser: false };
   }
   const accessToken = getAccessToken();
   const refreshToken = getRefreshToken();
@@ -25,11 +34,11 @@ function hydrateFromStorage(): AuthState {
     accessToken,
     refreshToken,
     isAuthenticated: !!accessToken,
+    is_superuser: accessToken ? decodeIsSuperuser(accessToken) : false,
   };
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  // Hydrate initial state from localStorage
   ...hydrateFromStorage(),
 
   login(pair: TokenPair) {
@@ -38,6 +47,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       accessToken: pair.access,
       refreshToken: pair.refresh,
       isAuthenticated: true,
+      is_superuser: decodeIsSuperuser(pair.access),
     });
   },
 
@@ -47,6 +57,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      is_superuser: false,
     });
   },
 
@@ -54,6 +65,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (typeof window !== "undefined") {
       localStorage.setItem("access_token", token);
     }
-    set({ accessToken: token });
+    set({ accessToken: token, is_superuser: decodeIsSuperuser(token) });
   },
 }));

@@ -24,8 +24,8 @@ import type { Transport } from '@/types/transport';
 interface TransportTableProps {
   data: Transport[];
   isLoading?: boolean;
-  onEdit: (transport: Transport) => void;
-  onDelete: (transport: Transport) => void;
+  onEdit?: (transport: Transport) => void;
+  onDelete?: (transport: Transport) => void;
 }
 
 export function TransportTable({ data, isLoading, onEdit, onDelete }: TransportTableProps) {
@@ -63,32 +63,28 @@ export function TransportTable({ data, isLoading, onEdit, onDelete }: TransportT
       header: 'Estado',
       cell: ({ row }) => <StatusBadge isActive={row.original.is_active} />,
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Editar transporte"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Eliminar transporte"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon" aria-label="Editar transporte" onClick={() => onEdit(row.original)}>
+              <Pencil className="size-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon" aria-label="Eliminar transporte" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

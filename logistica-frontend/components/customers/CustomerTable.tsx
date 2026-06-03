@@ -24,8 +24,8 @@ import type { Customer } from '@/types/customer';
 interface CustomerTableProps {
   data: Customer[];
   isLoading?: boolean;
-  onEdit: (customer: Customer) => void;
-  onDelete: (customer: Customer) => void;
+  onEdit?: (customer: Customer) => void;
+  onDelete?: (customer: Customer) => void;
 }
 
 export function CustomerTable({ data, isLoading, onEdit, onDelete }: CustomerTableProps) {
@@ -57,32 +57,28 @@ export function CustomerTable({ data, isLoading, onEdit, onDelete }: CustomerTab
       header: 'Estado',
       cell: ({ row }) => <StatusBadge isActive={row.original.is_active} />,
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
-      header: 'Acciones',
+      header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Editar cliente"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Eliminar cliente"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon-sm" aria-label="Editar cliente" onClick={() => onEdit(row.original)}>
+              <Pencil />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon-sm" aria-label="Eliminar cliente" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

@@ -24,8 +24,8 @@ interface ShipmentTableProps {
   data: Shipment[];
   isLoading?: boolean;
   customersMap: Record<number, string>;
-  onEdit: (shipment: Shipment) => void;
-  onDelete: (shipment: Shipment) => void;
+  onEdit?: (shipment: Shipment) => void;
+  onDelete?: (shipment: Shipment) => void;
 }
 
 export function ShipmentTable({ data, isLoading, customersMap, onEdit, onDelete }: ShipmentTableProps) {
@@ -63,32 +63,28 @@ export function ShipmentTable({ data, isLoading, customersMap, onEdit, onDelete 
       header: 'Peso total',
       cell: ({ row }) => `${parseFloat(row.original.total_weight_kg).toFixed(2)} kg`,
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Editar envío"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Eliminar envío"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon" aria-label="Editar envío" onClick={() => onEdit(row.original)}>
+              <Pencil className="size-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon" aria-label="Eliminar envío" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

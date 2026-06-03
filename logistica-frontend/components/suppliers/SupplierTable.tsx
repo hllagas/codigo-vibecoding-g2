@@ -23,8 +23,8 @@ import type { Supplier } from '@/types/supplier';
 interface SupplierTableProps {
   data: Supplier[];
   isLoading?: boolean;
-  onEdit: (supplier: Supplier) => void;
-  onDelete: (supplier: Supplier) => void;
+  onEdit?: (supplier: Supplier) => void;
+  onDelete?: (supplier: Supplier) => void;
 }
 
 export function SupplierTable({ data, isLoading, onEdit, onDelete }: SupplierTableProps) {
@@ -56,32 +56,28 @@ export function SupplierTable({ data, isLoading, onEdit, onDelete }: SupplierTab
       header: 'Estado',
       cell: ({ row }) => <StatusBadge isActive={row.original.is_active} />,
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
-      header: 'Acciones',
+      header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Editar proveedor"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Eliminar proveedor"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon-sm" aria-label="Editar proveedor" onClick={() => onEdit(row.original)}>
+              <Pencil />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon-sm" aria-label="Eliminar proveedor" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

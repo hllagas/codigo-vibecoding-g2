@@ -25,8 +25,8 @@ interface RouteTableProps {
   isLoading?: boolean;
   warehousesMap: Record<number, string>;
   transportsMap: Record<number, string>;
-  onEdit: (route: Route) => void;
-  onDelete: (route: Route) => void;
+  onEdit?: (route: Route) => void;
+  onDelete?: (route: Route) => void;
 }
 
 export function RouteTable({
@@ -76,32 +76,28 @@ export function RouteTable({
           ? new Date(row.original.started_at).toLocaleDateString()
           : '—',
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Editar ruta"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Eliminar ruta"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon" aria-label="Editar ruta" onClick={() => onEdit(row.original)}>
+              <Pencil className="size-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon" aria-label="Eliminar ruta" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

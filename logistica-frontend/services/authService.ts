@@ -1,5 +1,7 @@
 import axios from "axios";
 import type { LoginCredentials, TokenPair, TokenRefreshResponse } from "@/types/auth";
+import type { Profile } from "@/types/user";
+import { apiGet } from "@/lib/api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
 
@@ -21,4 +23,8 @@ export async function refreshToken(refresh: string): Promise<TokenRefreshRespons
     refresh,
   });
   return response.data;
+}
+
+export function getProfile(): Promise<Profile> {
+  return apiGet<Profile>('/auth/me/');
 }

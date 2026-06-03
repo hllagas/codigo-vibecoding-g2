@@ -16,6 +16,7 @@ import { WarehouseFilters } from '@/components/warehouses/WarehouseFilters';
 import { WarehouseForm } from '@/components/warehouses/WarehouseForm';
 import { useWarehouses } from '@/hooks/useWarehouses';
 import { useCreateWarehouse, useDeleteWarehouse } from '@/hooks/useWarehouseMutations';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { DataTablePagination } from '@/components/ui/DataTablePagination';
 import { getApiError } from '@/lib/errorUtils';
 import type { Warehouse, WarehouseCreate, WarehouseListParams } from '@/types/warehouse';
@@ -24,6 +25,7 @@ const PAGE_SIZE = 20;
 
 export default function WarehousesPage() {
   const router = useRouter();
+  const { can } = useUserPermissions();
   const [params, setParams] = useState<WarehouseListParams>({ page: 1 });
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Warehouse | null>(null);
@@ -72,10 +74,12 @@ export default function WarehousesPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Almacenes</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus />
-          Nuevo almacén
-        </Button>
+        {can('add_warehouse') && (
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus />
+            Nuevo almacén
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -92,8 +96,8 @@ export default function WarehousesPage() {
       <WarehouseTable
         data={data?.results ?? []}
         isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+        onEdit={can('change_warehouse') ? handleEdit : undefined}
+        onDelete={can('delete_warehouse') ? handleDeleteClick : undefined}
       />
 
       {data && (

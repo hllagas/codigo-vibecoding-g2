@@ -17,63 +17,81 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import type { Warehouse } from '@/types/warehouse';
+import { Badge } from '@/components/ui/badge';
+import type { Group } from '@/types/user';
 
-interface WarehouseTableProps {
-  data: Warehouse[];
+interface RoleTableProps {
+  data: Group[];
   isLoading?: boolean;
-  onEdit?: (warehouse: Warehouse) => void;
-  onDelete?: (warehouse: Warehouse) => void;
+  onEdit: (group: Group) => void;
+  onDelete: (group: Group) => void;
 }
 
-export function WarehouseTable({ data, isLoading, onEdit, onDelete }: WarehouseTableProps) {
-  const columns: ColumnDef<Warehouse>[] = [
+export function RoleTable({ data, isLoading, onEdit, onDelete }: RoleTableProps) {
+  const columns: ColumnDef<Group>[] = [
     {
       accessorKey: 'name',
-      header: 'Almacén',
+      header: 'Rol',
       cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
     },
     {
-      accessorKey: 'city',
-      header: 'Ciudad',
+      id: 'permissions_count',
+      header: 'Permisos',
+      cell: ({ row }) => {
+        const count = row.original.permissions.length;
+        return (
+          <Badge variant="secondary" className="text-xs">
+            {count} {count === 1 ? 'permiso' : 'permisos'}
+          </Badge>
+        );
+      },
     },
     {
-      accessorKey: 'country',
-      header: 'País',
+      id: 'permissions_preview',
+      header: 'Apps con acceso',
+      cell: ({ row }) => {
+        const apps = [...new Set(row.original.permissions.map((p) => p.content_type.app_label))];
+        if (apps.length === 0) return <span className="text-muted-foreground text-xs">Sin permisos</span>;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {apps.slice(0, 4).map((app) => (
+              <Badge key={app} variant="outline" className="text-xs capitalize">
+                {app}
+              </Badge>
+            ))}
+            {apps.length > 4 && (
+              <Badge variant="outline" className="text-xs">+{apps.length - 4}</Badge>
+            )}
+          </div>
+        );
+      },
     },
     {
-      accessorKey: 'capacity',
-      header: 'Capacidad',
-      cell: ({ row }) => row.original.capacity.toLocaleString('es-PE'),
-    },
-    {
-      accessorKey: 'is_active',
-      header: 'Estado',
-      cell: ({ row }) => <StatusBadge isActive={row.original.is_active} />,
-    },
-  ];
-
-  if (onEdit || onDelete) {
-    columns.push({
       id: 'actions',
-      header: '',
+      header: 'Acciones',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          {onEdit && (
-            <Button variant="ghost" size="icon-sm" aria-label="Editar almacén" onClick={() => onEdit(row.original)}>
-              <Pencil />
-            </Button>
-          )}
-          {onDelete && (
-            <Button variant="ghost" size="icon-sm" aria-label="Eliminar almacén" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
-              <Trash2 />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Editar rol"
+            onClick={() => onEdit(row.original)}
+          >
+            <Pencil />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Eliminar rol"
+            className="text-destructive hover:text-destructive"
+            onClick={() => onDelete(row.original)}
+          >
+            <Trash2 />
+          </Button>
         </div>
       ),
-    });
-  }
+    },
+  ];
 
   const table = useReactTable({
     data,
@@ -98,7 +116,7 @@ export function WarehouseTable({ data, isLoading, onEdit, onDelete }: WarehouseT
       </TableHeader>
       <TableBody>
         {isLoading ? (
-          Array.from({ length: 5 }).map((_, i) => (
+          Array.from({ length: 4 }).map((_, i) => (
             <TableRow key={i}>
               {columns.map((_, j) => (
                 <TableCell key={j}>
@@ -113,7 +131,7 @@ export function WarehouseTable({ data, isLoading, onEdit, onDelete }: WarehouseT
               colSpan={columns.length}
               className="text-center text-muted-foreground py-8"
             >
-              No hay almacenes registrados
+              No hay roles creados
             </TableCell>
           </TableRow>
         ) : (

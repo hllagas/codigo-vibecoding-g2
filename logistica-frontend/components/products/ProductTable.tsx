@@ -24,8 +24,8 @@ interface ProductTableProps {
   data: Product[];
   isLoading?: boolean;
   suppliersMap: Record<number, string>;
-  onEdit: (product: Product) => void;
-  onDelete: (product: Product) => void;
+  onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
 export function ProductTable({ data, isLoading, suppliersMap, onEdit, onDelete }: ProductTableProps) {
@@ -68,32 +68,28 @@ export function ProductTable({ data, isLoading, suppliersMap, onEdit, onDelete }
       header: 'Estado',
       cell: ({ row }) => <StatusBadge isActive={row.original.is_active} />,
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Editar producto"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Eliminar producto"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon" aria-label="Editar producto" onClick={() => onEdit(row.original)}>
+              <Pencil className="size-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon" aria-label="Eliminar producto" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

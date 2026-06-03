@@ -3,18 +3,16 @@
 import type { ElementType } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Shield, Clock, Hash } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { LogOut, User, Mail, Shield, Clock, Hash, Users } from 'lucide-react';
 
 interface JwtPayload {
-  user_id?: number;
-  username?: string;
-  user?: string;
-  sub?: string;
   exp?: number;
   iat?: number;
   token_type?: string;
-  jti?: string;
 }
 
 function decodeJwt(token: string): JwtPayload | null {
@@ -44,28 +42,53 @@ function timeUntilExpiry(exp: number): string {
 export default function ProfilePage() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const { logout } = useAuth();
+  const { data: profile, isLoading } = useProfile();
 
   const payload = accessToken ? decodeJwt(accessToken) : null;
-  const username = payload?.username ?? payload?.user ?? payload?.sub ?? 'Usuario';
-  const userId = payload?.user_id;
-  const initials = username.slice(0, 2).toUpperCase();
+
+  const displayName = profile
+    ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.username
+    : '…';
+  const username = profile?.username ?? '…';
+  const email = profile?.email ?? '';
+  const initials = (profile?.username ?? 'U').slice(0, 2).toUpperCase();
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Profile card */}
       <div className="rounded-xl border border-border/50 bg-card shadow-sm overflow-hidden">
-        {/* Cover */}
         <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
 
-        {/* Avatar + name */}
         <div className="px-6 pb-6">
           <div className="-mt-10 mb-4 flex items-end justify-between">
             <div className="size-20 rounded-full bg-primary/15 border-4 border-card flex items-center justify-center text-2xl font-bold text-primary select-none">
               {initials}
             </div>
           </div>
-          <h2 className="text-xl font-semibold">{username}</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Operador logístico</p>
+
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold">{displayName}</h2>
+
+              {/* Roles / badges */}
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {profile?.is_superuser && (
+                  <Badge variant="destructive" className="text-xs">Superadmin</Badge>
+                )}
+                {profile?.groups.map((g) => (
+                  <Badge key={g.id} variant="secondary" className="text-xs">{g.name}</Badge>
+                ))}
+                {!profile?.is_superuser && profile?.groups.length === 0 && (
+                  <span className="text-xs text-muted-foreground">Sin roles asignados</span>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -75,26 +98,42 @@ export default function ProfilePage() {
           <h3 className="text-sm font-semibold">Información de cuenta</h3>
         </div>
         <div className="divide-y divide-border/40">
-          <InfoRow icon={User} label="Usuario" value={username} />
-          {userId !== undefined && (
-            <InfoRow icon={Hash} label="ID de usuario" value={String(userId)} />
-          )}
-          {payload?.token_type && (
-            <InfoRow icon={Shield} label="Tipo de token" value={payload.token_type} />
-          )}
-          {payload?.iat && (
-            <InfoRow
-              icon={Clock}
-              label="Sesión iniciada"
-              value={formatDate(payload.iat)}
-            />
-          )}
-          {payload?.exp && (
-            <InfoRow
-              icon={Clock}
-              label="Token expira"
-              value={`${formatDate(payload.exp)} (${timeUntilExpiry(payload.exp)})`}
-            />
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-6 py-3.5">
+                <Skeleton className="size-4 rounded" />
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-36 ml-auto" />
+              </div>
+            ))
+          ) : (
+            <>
+              <InfoRow icon={User} label="Usuario" value={username} />
+              {email && <InfoRow icon={Mail} label="Email" value={email} />}
+              {profile?.id !== undefined && (
+                <InfoRow icon={Hash} label="ID de usuario" value={String(profile.id)} />
+              )}
+              {profile && profile.groups.length > 0 && (
+                <InfoRow
+                  icon={Users}
+                  label="Roles"
+                  value={profile.groups.map((g) => g.name).join(', ')}
+                />
+              )}
+              {payload?.token_type && (
+                <InfoRow icon={Shield} label="Tipo de token" value={payload.token_type} />
+              )}
+              {payload?.iat && (
+                <InfoRow icon={Clock} label="Sesión iniciada" value={formatDate(payload.iat)} />
+              )}
+              {payload?.exp && (
+                <InfoRow
+                  icon={Clock}
+                  label="Token expira"
+                  value={`${formatDate(payload.exp)} (${timeUntilExpiry(payload.exp)})`}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

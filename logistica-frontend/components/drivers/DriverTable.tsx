@@ -24,8 +24,8 @@ import type { Driver } from '@/types/driver';
 interface DriverTableProps {
   data: Driver[];
   isLoading?: boolean;
-  onEdit: (driver: Driver) => void;
-  onDelete: (driver: Driver) => void;
+  onEdit?: (driver: Driver) => void;
+  onDelete?: (driver: Driver) => void;
 }
 
 function getFullName(driver: Driver): string {
@@ -62,32 +62,28 @@ export function DriverTable({ data, isLoading, onEdit, onDelete }: DriverTablePr
       header: 'Disponibilidad',
       cell: ({ row }) => <DriverAvailabilityBadge isAvailable={row.original.is_available} />,
     },
-    {
+  ];
+
+  if (onEdit || onDelete) {
+    columns.push({
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Editar conductor"
-            onClick={() => onEdit(row.original)}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Eliminar conductor"
-            className="text-destructive hover:text-destructive"
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {onEdit && (
+            <Button variant="ghost" size="icon" aria-label="Editar conductor" onClick={() => onEdit(row.original)}>
+              <Pencil className="size-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="icon" aria-label="Eliminar conductor" className="text-destructive hover:text-destructive" onClick={() => onDelete(row.original)}>
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,
