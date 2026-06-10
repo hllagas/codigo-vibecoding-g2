@@ -9,8 +9,8 @@ const password = process.env.E2E_PASSWORD ?? "admin";
 test.describe("Login page", () => {
   test("valid credentials redirect away from /login", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Usuario").fill(username);
-    await page.getByLabel("Contraseña").fill(password);
+    await page.getByPlaceholder("nombre.usuario").fill(username);
+    await page.locator('input[type="password"]').fill(password);
     await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
     await expect(page).not.toHaveURL(/\/login/, { timeout: 12_000 });
@@ -18,8 +18,8 @@ test.describe("Login page", () => {
 
   test("invalid credentials show error message", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Usuario").fill("usuario_invalido");
-    await page.getByLabel("Contraseña").fill("contraseña_invalida_xyz");
+    await page.getByPlaceholder("nombre.usuario").fill("usuario_invalido");
+    await page.locator('input[type="password"]').fill("contraseña_invalida_xyz");
     await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
     // Error renders inside a .text-destructive <p> below the form fields
