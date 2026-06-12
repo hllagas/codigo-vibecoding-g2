@@ -23,12 +23,13 @@ import type { Shipment } from '@/types/shipment';
 interface ShipmentTableProps {
   data: Shipment[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   customersMap: Record<number, string>;
   onEdit?: (shipment: Shipment) => void;
   onDelete?: (shipment: Shipment) => void;
 }
 
-export function ShipmentTable({ data, isLoading, customersMap, onEdit, onDelete }: ShipmentTableProps) {
+export function ShipmentTable({ data, isLoading, hasActiveFilters, customersMap, onEdit, onDelete }: ShipmentTableProps) {
   const columns: ColumnDef<Shipment>[] = [
     {
       id: 'tracking_number',
@@ -120,7 +121,9 @@ export function ShipmentTable({ data, isLoading, customersMap, onEdit, onDelete 
           ) : data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
-                No hay envíos registrados
+                {hasActiveFilters
+                  ? 'Sin resultados. Prueba con otros filtros.'
+                  : 'No hay envíos registrados.'}
               </TableCell>
             </TableRow>
           ) : (

@@ -30,6 +30,7 @@ export default function ProductsPage() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   const { data, isLoading, isError } = useProducts(params);
+  const hasActiveFilters = !!(params.search || params.category || params.supplier !== undefined || params.is_active !== undefined);
   const { data: suppliersData } = useSuppliers({ page: 1 });
 
   const suppliersMap: Record<number, string> = {};
@@ -83,6 +84,7 @@ export default function ProductsPage() {
       <ProductTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         suppliersMap={suppliersMap}
         onEdit={can('change_product') ? handleEdit : undefined}
         onDelete={can('delete_product') ? handleDeleteClick : undefined}

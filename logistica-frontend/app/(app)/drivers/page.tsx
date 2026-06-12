@@ -29,6 +29,7 @@ export default function DriversPage() {
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
 
   const { data, isLoading, isError } = useDrivers(params);
+  const hasActiveFilters = !!(params.search || params.is_available !== undefined);
   const createMutation = useCreateDriver();
   const deleteMutation = useDeleteDriver();
 
@@ -81,6 +82,7 @@ export default function DriversPage() {
       <DriverTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         onEdit={can('change_driver') ? handleEdit : undefined}
         onDelete={can('delete_driver') ? handleDeleteClick : undefined}
       />

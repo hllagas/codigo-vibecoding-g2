@@ -23,6 +23,7 @@ import type { Route } from '@/types/route';
 interface RouteTableProps {
   data: Route[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   warehousesMap: Record<number, string>;
   transportsMap: Record<number, string>;
   onEdit?: (route: Route) => void;
@@ -32,6 +33,7 @@ interface RouteTableProps {
 export function RouteTable({
   data,
   isLoading,
+  hasActiveFilters,
   warehousesMap,
   transportsMap,
   onEdit,
@@ -133,7 +135,9 @@ export function RouteTable({
           ) : data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
-                No hay rutas registradas
+                {hasActiveFilters
+                  ? 'Sin resultados. Prueba con otros filtros.'
+                  : 'No hay rutas registradas.'}
               </TableCell>
             </TableRow>
           ) : (

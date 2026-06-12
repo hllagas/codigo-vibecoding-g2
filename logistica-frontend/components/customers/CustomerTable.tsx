@@ -24,11 +24,12 @@ import type { Customer } from '@/types/customer';
 interface CustomerTableProps {
   data: Customer[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   onEdit?: (customer: Customer) => void;
   onDelete?: (customer: Customer) => void;
 }
 
-export function CustomerTable({ data, isLoading, onEdit, onDelete }: CustomerTableProps) {
+export function CustomerTable({ data, isLoading, hasActiveFilters, onEdit, onDelete }: CustomerTableProps) {
   const columns: ColumnDef<Customer>[] = [
     {
       accessorKey: 'name',
@@ -118,7 +119,9 @@ export function CustomerTable({ data, isLoading, onEdit, onDelete }: CustomerTab
               colSpan={columns.length}
               className="text-center text-muted-foreground py-8"
             >
-              No hay clientes registrados
+              {hasActiveFilters
+                ? 'Sin resultados. Prueba con otros filtros.'
+                : 'No hay clientes registrados.'}
             </TableCell>
           </TableRow>
         ) : (

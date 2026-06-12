@@ -32,6 +32,7 @@ export default function ShipmentsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Shipment | null>(null);
 
   const { data, isLoading, isError } = useShipments(params);
+  const hasActiveFilters = !!(params.search || params.status || params.customer !== undefined || params.origin_warehouse !== undefined || params.route !== undefined);
   const { data: customersData } = useCustomers({ page: 1 });
 
   const customersMap: Record<number, string> = {};
@@ -86,6 +87,7 @@ export default function ShipmentsPage() {
       <ShipmentTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         customersMap={customersMap}
         onEdit={can('change_shipment') ? (shipment) => router.push(`/shipments/${shipment.id}`) : undefined}
         onDelete={can('delete_shipment') ? setDeleteTarget : undefined}

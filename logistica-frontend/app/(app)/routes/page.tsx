@@ -31,6 +31,7 @@ export default function RoutesPage() {
   const [routeToDelete, setRouteToDelete] = useState<Route | null>(null);
 
   const { data, isLoading, isError } = useRoutes(params);
+  const hasActiveFilters = !!(params.search || params.status || params.origin_warehouse !== undefined || params.transport !== undefined);
   const { data: warehousesData } = useWarehouses({ page: 1 });
   const { data: transportsData } = useTransports({ page: 1 });
 
@@ -85,6 +86,7 @@ export default function RoutesPage() {
       <RouteTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         warehousesMap={warehousesMap}
         transportsMap={transportsMap}
         onEdit={can('change_route') ? handleEdit : undefined}

@@ -23,11 +23,12 @@ import type { Warehouse } from '@/types/warehouse';
 interface WarehouseTableProps {
   data: Warehouse[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   onEdit?: (warehouse: Warehouse) => void;
   onDelete?: (warehouse: Warehouse) => void;
 }
 
-export function WarehouseTable({ data, isLoading, onEdit, onDelete }: WarehouseTableProps) {
+export function WarehouseTable({ data, isLoading, hasActiveFilters, onEdit, onDelete }: WarehouseTableProps) {
   const columns: ColumnDef<Warehouse>[] = [
     {
       accessorKey: 'name',
@@ -113,7 +114,9 @@ export function WarehouseTable({ data, isLoading, onEdit, onDelete }: WarehouseT
               colSpan={columns.length}
               className="text-center text-muted-foreground py-8"
             >
-              No hay almacenes registrados
+              {hasActiveFilters
+                ? 'Sin resultados. Prueba con otros filtros.'
+                : 'No hay almacenes registrados.'}
             </TableCell>
           </TableRow>
         ) : (

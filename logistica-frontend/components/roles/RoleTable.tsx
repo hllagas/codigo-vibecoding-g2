@@ -131,7 +131,7 @@ export function RoleTable({ data, isLoading, onEdit, onDelete }: RoleTableProps)
               colSpan={columns.length}
               className="text-center text-muted-foreground py-8"
             >
-              No hay roles creados
+              No hay roles creados.
             </TableCell>
           </TableRow>
         ) : (

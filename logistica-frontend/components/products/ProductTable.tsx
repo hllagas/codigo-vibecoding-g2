@@ -23,12 +23,13 @@ import type { Product } from '@/types/product';
 interface ProductTableProps {
   data: Product[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   suppliersMap: Record<number, string>;
   onEdit?: (product: Product) => void;
   onDelete?: (product: Product) => void;
 }
 
-export function ProductTable({ data, isLoading, suppliersMap, onEdit, onDelete }: ProductTableProps) {
+export function ProductTable({ data, isLoading, hasActiveFilters, suppliersMap, onEdit, onDelete }: ProductTableProps) {
   const columns: ColumnDef<Product>[] = [
     {
       id: 'name',
@@ -125,7 +126,9 @@ export function ProductTable({ data, isLoading, suppliersMap, onEdit, onDelete }
           ) : data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
-                No hay productos registrados
+                {hasActiveFilters
+                  ? 'Sin resultados. Prueba con otros filtros.'
+                  : 'No hay productos registrados.'}
               </TableCell>
             </TableRow>
           ) : (

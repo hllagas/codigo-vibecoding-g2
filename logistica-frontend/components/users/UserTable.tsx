@@ -134,7 +134,7 @@ export function UserTable({ data, isLoading, onEdit, onDelete }: UserTableProps)
               colSpan={columns.length}
               className="text-center text-muted-foreground py-8"
             >
-              No hay usuarios registrados
+              No hay usuarios registrados.
             </TableCell>
           </TableRow>
         ) : (

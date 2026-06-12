@@ -24,11 +24,12 @@ import type { Transport } from '@/types/transport';
 interface TransportTableProps {
   data: Transport[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   onEdit?: (transport: Transport) => void;
   onDelete?: (transport: Transport) => void;
 }
 
-export function TransportTable({ data, isLoading, onEdit, onDelete }: TransportTableProps) {
+export function TransportTable({ data, isLoading, hasActiveFilters, onEdit, onDelete }: TransportTableProps) {
   const columns: ColumnDef<Transport>[] = [
     {
       id: 'name',
@@ -120,7 +121,9 @@ export function TransportTable({ data, isLoading, onEdit, onDelete }: TransportT
           ) : data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
-                No hay transportes registrados
+                {hasActiveFilters
+                  ? 'Sin resultados. Prueba con otros filtros.'
+                  : 'No hay transportes registrados.'}
               </TableCell>
             </TableRow>
           ) : (

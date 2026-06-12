@@ -24,6 +24,7 @@ import type { Driver } from '@/types/driver';
 interface DriverTableProps {
   data: Driver[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   onEdit?: (driver: Driver) => void;
   onDelete?: (driver: Driver) => void;
 }
@@ -35,7 +36,7 @@ function getFullName(driver: Driver): string {
   return full || driver.user_detail.username;
 }
 
-export function DriverTable({ data, isLoading, onEdit, onDelete }: DriverTableProps) {
+export function DriverTable({ data, isLoading, hasActiveFilters, onEdit, onDelete }: DriverTableProps) {
   const columns: ColumnDef<Driver>[] = [
     {
       id: 'full_name',
@@ -119,7 +120,9 @@ export function DriverTable({ data, isLoading, onEdit, onDelete }: DriverTablePr
           ) : data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
-                No hay conductores registrados
+                {hasActiveFilters
+                  ? 'Sin resultados. Prueba con otros filtros.'
+                  : 'No hay conductores registrados.'}
               </TableCell>
             </TableRow>
           ) : (

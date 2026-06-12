@@ -31,6 +31,7 @@ export default function WarehousesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Warehouse | null>(null);
 
   const { data, isLoading, isError } = useWarehouses(params);
+  const hasActiveFilters = !!(params.search || params.city || params.country || params.is_active !== undefined);
   const createMutation = useCreateWarehouse();
   const deleteMutation = useDeleteWarehouse();
 
@@ -96,6 +97,7 @@ export default function WarehousesPage() {
       <WarehouseTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         onEdit={can('change_warehouse') ? handleEdit : undefined}
         onDelete={can('delete_warehouse') ? handleDeleteClick : undefined}
       />

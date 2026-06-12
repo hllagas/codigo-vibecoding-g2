@@ -31,6 +31,7 @@ export default function CustomersPage() {
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
   const { data, isLoading, isError } = useCustomers(params);
+  const hasActiveFilters = !!(params.search || params.customer_type || params.city || params.country || params.is_active !== undefined);
   const createMutation = useCreateCustomer();
   const deleteMutation = useDeleteCustomer();
 
@@ -96,6 +97,7 @@ export default function CustomersPage() {
       <CustomerTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         onEdit={can('change_customer') ? handleEdit : undefined}
         onDelete={can('delete_customer') ? handleDeleteClick : undefined}
       />

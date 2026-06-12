@@ -31,6 +31,7 @@ export default function SuppliersPage() {
   const [deleteTarget, setDeleteTarget] = useState<Supplier | null>(null);
 
   const { data, isLoading, isError } = useSuppliers(params);
+  const hasActiveFilters = !!(params.search || params.city || params.country || params.is_active !== undefined);
   const createMutation = useCreateSupplier();
   const deleteMutation = useDeleteSupplier();
 
@@ -96,6 +97,7 @@ export default function SuppliersPage() {
       <SupplierTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         onEdit={can('change_supplier') ? handleEdit : undefined}
         onDelete={can('delete_supplier') ? handleDeleteClick : undefined}
       />

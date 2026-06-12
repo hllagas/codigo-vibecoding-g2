@@ -23,11 +23,12 @@ import type { Supplier } from '@/types/supplier';
 interface SupplierTableProps {
   data: Supplier[];
   isLoading?: boolean;
+  hasActiveFilters?: boolean;
   onEdit?: (supplier: Supplier) => void;
   onDelete?: (supplier: Supplier) => void;
 }
 
-export function SupplierTable({ data, isLoading, onEdit, onDelete }: SupplierTableProps) {
+export function SupplierTable({ data, isLoading, hasActiveFilters, onEdit, onDelete }: SupplierTableProps) {
   const columns: ColumnDef<Supplier>[] = [
     {
       accessorKey: 'name',
@@ -117,7 +118,9 @@ export function SupplierTable({ data, isLoading, onEdit, onDelete }: SupplierTab
               colSpan={columns.length}
               className="text-center text-muted-foreground py-8"
             >
-              No hay proveedores registrados
+              {hasActiveFilters
+                ? 'Sin resultados. Prueba con otros filtros.'
+                : 'No hay proveedores registrados.'}
             </TableCell>
           </TableRow>
         ) : (

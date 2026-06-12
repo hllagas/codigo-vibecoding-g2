@@ -29,6 +29,7 @@ export default function TransportsPage() {
   const [transportToDelete, setTransportToDelete] = useState<Transport | null>(null);
 
   const { data, isLoading, isError } = useTransports(params);
+  const hasActiveFilters = !!(params.search || params.transport_type || params.is_active !== undefined || params.driver !== undefined);
   const createMutation = useCreateTransport();
   const deleteMutation = useDeleteTransport();
 
@@ -75,6 +76,7 @@ export default function TransportsPage() {
       <TransportTable
         data={data?.results ?? []}
         isLoading={isLoading}
+        hasActiveFilters={hasActiveFilters}
         onEdit={can('change_transport') ? handleEdit : undefined}
         onDelete={can('delete_transport') ? handleDeleteClick : undefined}
       />
