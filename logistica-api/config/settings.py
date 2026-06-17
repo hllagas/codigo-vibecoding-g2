@@ -39,7 +39,7 @@ if RAILWAY_DOMAIN:
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://logistica-frontend-3w629k1uu-henry-llagas-projects.vercel.app/',
+    'https://logistica-frontend-git-main-henry-llagas-projects.vercel.app/',
 ]
 
 
