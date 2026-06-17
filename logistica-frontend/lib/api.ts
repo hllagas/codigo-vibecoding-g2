@@ -2,8 +2,10 @@ import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "@/lib/auth";
 
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1',
+  baseURL: API_BASE_URL,
 });
 
 // Request interceptor: attach Bearer token
@@ -60,8 +62,7 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
-      const { data } = await axios.post(`${baseURL}/auth/token/refresh/`, {
+      const { data } = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
         refresh: refreshToken,
       });
 
