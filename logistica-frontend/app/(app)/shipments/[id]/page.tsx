@@ -43,8 +43,8 @@ export default function ShipmentDetailPage() {
   warehousesData?.results.forEach((w) => { warehousesMap[w.id] = w.name; });
   const routesMap: Record<number, string> = {};
   routesData?.results.forEach((r) => { routesMap[r.id] = r.name; });
-  const productsMap: Record<number, string> = {};
-  productsData?.results.forEach((p) => { productsMap[p.id] = p.name; });
+  const productsMap: Record<number, { name: string; image_url: string | null }> = {};
+  productsData?.results.forEach((p) => { productsMap[p.id] = { name: p.name, image_url: p.image_url }; });
 
   const updateMutation = useUpdateShipment();
   const deleteMutation = useDeleteShipment();

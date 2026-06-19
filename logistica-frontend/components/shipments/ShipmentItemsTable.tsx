@@ -15,10 +15,16 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import type { ShipmentItem } from '@/types/shipment';
+import { ProductImage } from '@/components/ui/ProductImage';
+
+interface ProductInfo {
+  name: string;
+  image_url: string | null;
+}
 
 interface ShipmentItemsTableProps {
   items: ShipmentItem[];
-  productsMap: Record<number, string>;
+  productsMap: Record<number, ProductInfo>;
 }
 
 export function ShipmentItemsTable({ items, productsMap }: ShipmentItemsTableProps) {
@@ -26,8 +32,19 @@ export function ShipmentItemsTable({ items, productsMap }: ShipmentItemsTablePro
     {
       id: 'product',
       header: 'Producto',
-      cell: ({ row }) =>
-        productsMap[row.original.product] ?? `ID ${row.original.product}`,
+      cell: ({ row }) => {
+        const info = productsMap[row.original.product];
+        return (
+          <div className="flex items-center gap-2">
+            <ProductImage
+              src={info?.image_url}
+              alt={info?.name ?? `ID ${row.original.product}`}
+              size="sm"
+            />
+            <span>{info?.name ?? `ID ${row.original.product}`}</span>
+          </div>
+        );
+      },
     },
     {
       id: 'quantity',

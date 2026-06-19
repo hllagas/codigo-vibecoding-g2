@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { getApiError } from '@/lib/errorUtils';
+import { ProductImage } from '@/components/ui/ProductImage';
 import type { ProductCreate } from '@/types/product';
 
 export default function ProductDetailPage() {
@@ -117,6 +118,10 @@ export default function ProductDetailPage() {
       </div>
 
       <Separator />
+
+      <div className="flex justify-center">
+        <ProductImage src={product.image_url} alt={product.name} size="lg" />
+      </div>
 
       <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>

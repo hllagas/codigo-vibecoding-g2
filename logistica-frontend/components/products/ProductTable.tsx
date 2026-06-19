@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Pencil, Trash2 } from 'lucide-react';
 import type { Product } from '@/types/product';
+import { ProductImage } from '@/components/ui/ProductImage';
 
 interface ProductTableProps {
   data: Product[];
@@ -34,7 +35,12 @@ export function ProductTable({ data, isLoading, hasActiveFilters, suppliersMap, 
     {
       id: 'name',
       header: 'Producto',
-      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <ProductImage src={row.original.image_url} alt={row.original.name} size="sm" />
+          <span className="font-medium">{row.original.name}</span>
+        </div>
+      ),
     },
     {
       id: 'sku',

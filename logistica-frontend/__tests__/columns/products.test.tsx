@@ -14,6 +14,7 @@ const baseProduct: Product = {
   weight_kg: "1.500",
   supplier: 2,
   is_active: true,
+  image_url: null,
   created_at: "2024-01-01T00:00:00Z",
   updated_at: "2024-01-01T00:00:00Z",
 };
