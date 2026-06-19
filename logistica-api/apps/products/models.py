@@ -21,6 +21,8 @@ class Product(models.Model):
         null=True,
         blank=True,
     )
+    # Imagen del producto — almacenada en GCS o en FileSystemStorage según configuración
+    image = models.ImageField(upload_to='products/', null=True, blank=True)
     # Estado activo/inactivo del producto
     is_active = models.BooleanField(default=True)
     # Fechas de auditoría

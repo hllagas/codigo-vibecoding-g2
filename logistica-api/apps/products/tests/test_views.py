@@ -1,6 +1,11 @@
+import io
 from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -307,3 +312,111 @@ class ProductViewSetTest(APITestCase):
         response = self.client.get(self.url_detail)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['supplier'], self.supplier.id)
+
+
+@override_settings(
+    STORAGES={
+        'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    }
+)
+class ProductImageUploadTest(APITestCase):
+    """Tests del action POST /api/v1/products/{id}/upload-image/."""
+
+    def setUp(self):
+        # Usuario autenticado — todos los endpoints requieren JWT
+        self.user = User.objects.create_user(
+            username='imguser',
+            password='testpass123',
+        )
+        self.client.force_authenticate(user=self.user)
+
+        # Proveedor requerido por la FK de Product
+        self.supplier = Supplier.objects.create(
+            name='Image Supplier',
+            email='imgsupplier@test.com',
+            city='Lima',
+            country='Peru',
+        )
+
+        # Producto base para los tests de imagen
+        self.product = Product.objects.create(
+            name='Camera HD',
+            sku='CAM-IMG-001',
+            category='camera',
+            unit_price=Decimal('299.99'),
+            weight_kg=Decimal('0.500'),
+            supplier=self.supplier,
+        )
+
+        self.url_upload = f'/api/v1/products/{self.product.id}/upload-image/'
+
+    def _make_image_file(self, name='test_image.png'):
+        """Crea un PNG válido en memoria usando Pillow para evitar errores de validación."""
+        img = Image.new('RGB', (10, 10), color=(255, 0, 0))
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        return SimpleUploadedFile(
+            name,
+            buf.getvalue(),
+            content_type='image/png',
+        )
+
+    def test_upload_image_success(self):
+        """POST con imagen válida retorna 200 y image_url no nulo en la respuesta."""
+        image_file = self._make_image_file()
+        response = self.client.post(
+            self.url_upload,
+            {'image': image_file},
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(response.data.get('image_url'))
+
+    def test_upload_image_no_file_returns_400(self):
+        """POST sin archivo retorna 400."""
+        response = self.client.post(self.url_upload, {}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_upload_image_unauthenticated_returns_401(self):
+        """POST sin autenticación retorna 401."""
+        self.client.force_authenticate(user=None)
+        image_file = self._make_image_file()
+        response = self.client.post(
+            self.url_upload,
+            {'image': image_file},
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_upload_image_nonexistent_product_returns_404(self):
+        """POST a /products/99999/upload-image/ retorna 404."""
+        image_file = self._make_image_file()
+        response = self.client.post(
+            '/api/v1/products/99999/upload-image/',
+            {'image': image_file},
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_image_url_null_when_no_image(self):
+        """GET de un producto sin imagen retorna image_url: null."""
+        response = self.client.get(f'/api/v1/products/{self.product.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data.get('image_url'))
+
+    def test_image_url_present_after_upload(self):
+        """GET después de upload retorna image_url no nulo."""
+        # Subir imagen primero
+        image_file = self._make_image_file()
+        upload_response = self.client.post(
+            self.url_upload,
+            {'image': image_file},
+            format='multipart',
+        )
+        self.assertEqual(upload_response.status_code, status.HTTP_200_OK)
+
+        # Verificar que el GET devuelve image_url con valor
+        response = self.client.get(f'/api/v1/products/{self.product.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(response.data.get('image_url'))

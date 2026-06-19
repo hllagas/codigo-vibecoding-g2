@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+from datetime import timedelta
+import json
 from pathlib import Path
 
 import dj_database_url
@@ -39,7 +41,7 @@ if RAILWAY_DOMAIN:
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://logistica-frontend-git-main-henry-llagas-projects.vercel.app/',
+    'https://logistica-frontend-git-main-henry-llagas-projects.vercel.app',
     'https://tu-frontend.com',
     'http://localhost:5173',
 ]
@@ -60,6 +62,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_filters',
+    'storages',
     # App de concerns transversales (sin modelos ni vistas)
     'apps.core',
     # Apps de dominio — Phase 2
@@ -212,6 +215,34 @@ STORAGES = {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
+
+# Configuración de Google Cloud Storage
+GS_BUCKET_NAME = config('GCS_BUCKET_NAME', default='')
+GS_QUERYSTRING_AUTH = True       # URLs firmadas con expiración
+GS_EXPIRATION = timedelta(minutes=15)
+GS_FILE_OVERWRITE = False        # No sobreescribir archivos con el mismo nombre
+GS_DEFAULT_ACL = None            # Sin ACL pública — acceso solo via URL firmada
+
+# Credenciales GCS: JSON string (Railway/prod) o path de archivo (dev local)
+_gcs_credentials_json = config('GCS_CREDENTIALS_JSON', default='')
+_gcs_credentials_file = config('GCS_CREDENTIALS_FILE', default='')
+
+if _gcs_credentials_json:
+    from google.oauth2 import service_account
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
+        json.loads(_gcs_credentials_json)
+    )
+elif _gcs_credentials_file:
+    from google.oauth2 import service_account
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        _gcs_credentials_file
+    )
+
+# Activar GCS solo cuando GCS_BUCKET_NAME está configurado; fallback a FileSystemStorage en desarrollo
+if GS_BUCKET_NAME:
+    STORAGES['default'] = {
+        'BACKEND': 'storages.backends.gcloud.GoogleCloudStorage',
+    }
 
 # Configuración de seguridad para Railway
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
