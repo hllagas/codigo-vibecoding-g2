@@ -95,6 +95,8 @@ export default function ProductDetailPage() {
           defaultValues={product}
           onSubmit={handleUpdate}
           isSubmitting={updateMutation.isPending}
+          productId={product.id}
+          currentImageUrl={product.image_url}
         />
       </div>
     );

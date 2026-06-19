@@ -3,7 +3,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Loader2, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Form,
   FormControl,
@@ -20,7 +22,11 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { useUploadProductImage } from '@/hooks/useProductMutations';
+import { ProductImage } from '@/components/ui/ProductImage';
+import { getApiError } from '@/lib/errorUtils';
 import type { ProductCreate } from '@/types/product';
 
 const productSchema = z.object({
@@ -40,10 +46,16 @@ interface ProductFormProps {
   defaultValues?: Partial<ProductCreate>;
   onSubmit: (data: ProductCreate) => Promise<void>;
   isSubmitting?: boolean;
+  productId?: number;
+  currentImageUrl?: string | null;
 }
 
-export function ProductForm({ defaultValues, onSubmit, isSubmitting }: ProductFormProps) {
+export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, currentImageUrl }: ProductFormProps) {
   const { data: suppliersData } = useSuppliers({ is_active: true, page: 1 });
+  const uploadMutation = useUploadProductImage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [liveImageUrl, setLiveImageUrl] = useState<string | null | undefined>(currentImageUrl);
   const suppliers = suppliersData?.results ?? [];
 
   const form = useForm<ProductFormValues>({
@@ -59,6 +71,23 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting }: ProductFo
       is_active: defaultValues?.is_active ?? true,
     },
   });
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setSelectedFile(e.target.files?.[0] ?? null);
+  }
+
+  async function handleUpload() {
+    if (!selectedFile || productId === undefined) return;
+    try {
+      const updated = await uploadMutation.mutateAsync({ id: productId, file: selectedFile });
+      setLiveImageUrl(updated.image_url);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      toast.success('Imagen actualizada');
+    } catch (err) {
+      toast.error(getApiError(err));
+    }
+  }
 
   async function handleSubmit(values: ProductFormValues) {
     const data: ProductCreate = {
@@ -219,6 +248,56 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting }: ProductFo
             </FormItem>
           )}
         />
+
+        {productId !== undefined && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Imagen del producto</p>
+              <div className="flex items-center gap-4">
+                <ProductImage src={liveImageUrl} alt="Imagen del producto" size="md" />
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {selectedFile ? selectedFile.name : 'Seleccionar imagen'}
+                  </Button>
+                  {selectedFile && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={uploadMutation.isPending}
+                      onClick={handleUpload}
+                    >
+                      {uploadMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                          Subiendo…
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 size-4" />
+                          Subir imagen
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <Separator />
+          </>
+        )}
 
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? (
